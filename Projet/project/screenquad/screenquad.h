@@ -100,7 +100,7 @@ class ScreenQuad {
             this->screenquad_height_ = screenquad_height;
         }
 
-        void Draw(int h, float filter) {
+        void Draw() {
             glUseProgram(program_id_);
             glBindVertexArray(vertex_array_id_);
 
@@ -110,18 +110,6 @@ class ScreenQuad {
             glUniform1f(glGetUniformLocation(program_id_, "tex_height"),
                         this->screenquad_height_);
 
-            // 1D kernel G
-            float variance = (filter == 0.0f) ? 0.25f : filter;
-            const int SIZE = 31; //Must be an odd value
-            float G[SIZE];
-            for(int i = 0; i < SIZE; i++) {
-                float x = i-floor(SIZE/2.0f);
-                G[i] = exp(-(x*x)/(2.0f*(variance*variance*variance*variance)));
-            }
-
-            glUniform1fv(glGetUniformLocation(program_id_, "G"), SIZE, &G[0]);
-            glUniform1i(glGetUniformLocation(program_id_, "horizontal"), h);
-            glUniform1i(glGetUniformLocation(program_id_, "SIZE"), SIZE);
 
             // bind texture
             glActiveTexture(GL_TEXTURE0);
