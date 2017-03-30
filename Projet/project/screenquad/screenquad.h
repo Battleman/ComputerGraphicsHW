@@ -14,7 +14,7 @@ class ScreenQuad {
 
     public:
         void Init(float screenquad_width, float screenquad_height,
-                  GLuint first_pass_texture/*, GLuint second_pass_texture*/) {
+                  GLuint texture) {
 
             // set screenquad size
             this->screenquad_width_ = screenquad_width;
@@ -75,9 +75,9 @@ class ScreenQuad {
             }
 
             // load/Assign texture
-            this->texture_id_ = first_pass_texture;
+            this->texture_id_ = texture;
             glBindTexture(GL_TEXTURE_2D, texture_id_);
-            GLuint tex_id = glGetUniformLocation(program_id_, "tex1");
+            GLuint tex_id = glGetUniformLocation(program_id_, "tex");
             glUniform1i(tex_id, 0 /*GL_TEXTURE0*/);
             glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -109,7 +109,6 @@ class ScreenQuad {
                         this->screenquad_width_);
             glUniform1f(glGetUniformLocation(program_id_, "tex_height"),
                         this->screenquad_height_);
-
 
             // bind texture
             glActiveTexture(GL_TEXTURE0);

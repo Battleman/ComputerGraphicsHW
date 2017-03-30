@@ -8,7 +8,10 @@ class Quad {
         GLuint vertex_array_id_;        // vertex array object
         GLuint program_id_;             // GLSL shader program ID
         GLuint vertex_buffer_object_;   // memory buffer
+        GLuint vertex_buffer_object_position_;  // memory buffer for positions
+        GLuint vertex_buffer_object_index_;     // memory buffer for indices
         GLuint texture_id_;             // texture ID
+        GLuint num_indices_;                    // number of vertices to render
 
     public:
         void Init() {
@@ -25,46 +28,90 @@ class Quad {
             glGenVertexArrays(1, &vertex_array_id_);
             glBindVertexArray(vertex_array_id_);
 
-            // vertex coordinates
+            // vertex coordinates and indices
             {
-                const GLfloat vertex_point[] = { /*V1*/ -1.0f, -1.0f, 0.0f,
-                                                 /*V2*/ +1.0f, -1.0f, 0.0f,
-                                                 /*V3*/ -1.0f, +1.0f, 0.0f,
-                                                 /*V4*/ +1.0f, +1.0f, 0.0f};
-                // buffer
-                glGenBuffers(1, &vertex_buffer_object_);
-                glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_point),
-                             vertex_point, GL_STATIC_DRAW);
+                std::vector<GLfloat> vertices;
+                std::vector<GLuint> indices;
+                // TODO 5: make a triangle grid with dimension 100x100.
+                // always two subsequent entries in 'vertices' form a 2D vertex position.
+                int grid_dim = 100;
 
-                // attribute
-                GLuint vertex_point_id = glGetAttribLocation(program_id_, "vpoint");
-                glEnableVertexAttribArray(vertex_point_id);
-                glVertexAttribPointer(vertex_point_id, 3, GL_FLOAT, DONT_NORMALIZE,
+                // the given code below are the vertices for a simple quad.
+                // your grid should have the same dimension as that quad, i.e.,
+                // reach from [-1, -1] to [1, 1].
+
+                //generate all the vertices for the grid
+                //some vertices have to be almost handwritten to avoid having
+                //unwanted edges on the board. In the border the triangles are
+                //half the size because the grid must be a square, so their vertices
+                //are outside the second loop.
+                int index = 0;
+                vertices.push_back(-1.0f);
+                vertices.push_back(-1.0f);
+                indices.push_back(index++);
+                float l = 2.0f/(float)grid_dim;
+                for(int i = 0; i<grid_dim; i++) {
+                    if(i%2 != 1){
+                        for(int j = 0; j<grid_dim; j++) {
+                            vertices.push_back((((float)j)*l)-1.0f);
+                            vertices.push_back((((float)(i+1))*l)-1.0f);
+                            indices.push_back(index++);
+                            vertices.push_back((((float)j+0.5f)*l)-1.0f);
+                            vertices.push_back((((float)i)*l)-1.0f);
+                            indices.push_back(index++);
+                        }
+                        vertices.push_back((((float)grid_dim)*l)-1.0f);
+                        vertices.push_back((((float)(i+1))*l)-1.0f);
+                        indices.push_back(index++);
+                        vertices.push_back((((float)grid_dim)*l)-1.0f);
+                        vertices.push_back((((float)i)*l)-1.0f);
+                        indices.push_back(index++);
+                        vertices.push_back((((float)grid_dim)*l)-1.0f);
+                        vertices.push_back((((float)(i+1))*l)-1.0f);
+                        indices.push_back(index++);
+                    } else {
+                        vertices.push_back((((float)grid_dim)*l)-1.0f);
+                        vertices.push_back((((float)(i+1))*l)-1.0f);
+                        indices.push_back(index++);
+                        vertices.push_back((((float)grid_dim)*l)-1.0f);
+                        vertices.push_back((((float)(i))*l)-1.0f);
+                        indices.push_back(index++);
+                        for(int j = 0; j<grid_dim; j++) {
+                            vertices.push_back(((-((float)j+0.5f))*l)+1.0f);
+                            vertices.push_back((((float)(i+1))*l)-1.0f);
+                            indices.push_back(index++);
+                            vertices.push_back(((-((float)j+1.0f))*l)+1.0f);
+                            vertices.push_back((((float)i)*l)-1.0f);
+                            indices.push_back(index++);
+                        }
+                        vertices.push_back(-1.0f);
+                        vertices.push_back((((float)i+1)*l)-1.0f);
+                        indices.push_back(index++);
+                    }
+
+                }
+
+                num_indices_ = indices.size();
+
+                // position buffer
+                glGenBuffers(1, &vertex_buffer_object_position_);
+                glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_position_);
+                glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat),
+                             &vertices[0], GL_STATIC_DRAW);
+
+                // vertex indices
+                glGenBuffers(1, &vertex_buffer_object_index_);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_buffer_object_index_);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint),
+                             &indices[0], GL_STATIC_DRAW);
+
+                // position shader attribute
+                GLuint loc_position = glGetAttribLocation(program_id_, "position");
+                glEnableVertexAttribArray(loc_position);
+                glVertexAttribPointer(loc_position, 2, GL_FLOAT, DONT_NORMALIZE,
                                       ZERO_STRIDE, ZERO_BUFFER_OFFSET);
             }
 
-            // texture coordinates
-            {
-                const GLfloat vertex_texture_coordinates[] = { /*V1*/ 0.0f, 0.0f,
-                                                               /*V2*/ 1.0f, 0.0f,
-                                                               /*V3*/ 0.0f, 1.0f,
-                                                               /*V4*/ 1.0f, 1.0f};
-
-                // buffer
-                glGenBuffers(1, &vertex_buffer_object_);
-                glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_texture_coordinates),
-                             vertex_texture_coordinates, GL_STATIC_DRAW);
-
-                // attribute
-                GLuint vertex_texture_coord_id = glGetAttribLocation(program_id_,
-                                                                     "vtexcoord");
-                glEnableVertexAttribArray(vertex_texture_coord_id);
-                glVertexAttribPointer(vertex_texture_coord_id, 2, GL_FLOAT,
-                                      DONT_NORMALIZE, ZERO_STRIDE,
-                                      ZERO_BUFFER_OFFSET);
-            }
 
             // load texture
             {
@@ -111,6 +158,8 @@ class Quad {
             glBindVertexArray(0);
             glUseProgram(0);
             glDeleteBuffers(1, &vertex_buffer_object_);
+            glDeleteBuffers(1, &vertex_buffer_object_position_);
+            glDeleteBuffers(1, &vertex_buffer_object_index_);
             glDeleteProgram(program_id_);
             glDeleteVertexArrays(1, &vertex_array_id_);
             glDeleteTextures(1, &texture_id_);
@@ -132,7 +181,8 @@ class Quad {
             glUniformMatrix4fv(MVP_id, 1, GL_FALSE, value_ptr(MVP));
 
             // draw
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            glDrawElements(GL_TRIANGLE_STRIP, num_indices_, GL_UNSIGNED_INT, 0);
 
             glBindVertexArray(0);
             glUseProgram(0);
