@@ -5,8 +5,8 @@
 *.obj
 
 # Precompiled Headers
-*.gch
-*.pch
+#*.gch
+#*.pch
 
 # Compiled Dynamic libraries
 *.so
@@ -54,3 +54,7 @@ Makefile*
 
 # QtCtreator CMake
 CMakeLists.txt.user*
+
+#Different
+common*
+external*
