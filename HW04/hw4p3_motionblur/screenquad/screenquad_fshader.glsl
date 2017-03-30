@@ -10,7 +10,7 @@ void main() {
     vec2 velocity = texture(velocityTex, uv).xy;
 //    vec2 velocity = vec2(1,0);
     vec4 color_tot = vec4(0,0,0,0);
-    float total = 5.0f;
+    float total = 30.0f;
     for(int i = 0; i < total; i++) {
         vec4 neigh_color = texture(colorTex, uv + vec2(velocity.x*i/total, velocity.y*i/total));
         color_tot += neigh_color;
