@@ -40,9 +40,9 @@ void Init(GLFWwindow* window) {
     vec3 cam_pos(2.0f, 2.0f, 2.0f);
     vec3 cam_look(0.0f, 0.0f, 0.0f);
     vec3 cam_up(0.0f, 0.0f, 1.0f);
-    view_matrix = lookAt(cam_pos, cam_look, cam_up);
+    view_matrix = IDENTITY_MATRIX;//lookAt(cam_pos, cam_look, cam_up);
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
+    projection_matrix = IDENTITY_MATRIX;//perspective(45.0f, ratio, 0.1f, 10.0f);
 
     // create the model matrix (remember OpenGL is right handed)
     // accumulated transformation
@@ -65,22 +65,14 @@ void Display() {
     framebuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        cube.Draw(cube_model_matrix, view_matrix, projection_matrix);
         quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix);
-    }
-    framebuffer.Unbind();
-
-
-    framebuffer.Bind();
-    {
-        screenquad.Draw(0, filter);
     }
     framebuffer.Unbind();
 
     // render to Window
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    screenquad.Draw(1, filter);
+    screenquad.Draw();
 }
 
 // gets called when the windows/framebuffer is resized.
@@ -89,7 +81,7 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     window_height = height;
 
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
+    //projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
 
     glViewport(0, 0, window_width, window_height);
 
