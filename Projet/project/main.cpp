@@ -40,9 +40,9 @@ void Init(GLFWwindow* window) {
     vec3 cam_pos(2.0f, 2.0f, 2.0f);
     vec3 cam_look(0.0f, 0.0f, 0.0f);
     vec3 cam_up(0.0f, 0.0f, 1.0f);
-    view_matrix = IDENTITY_MATRIX;//lookAt(cam_pos, cam_look, cam_up);
+    view_matrix = lookAt(cam_pos, cam_look, cam_up);
     float ratio = window_width / (float) window_height;
-    projection_matrix = IDENTITY_MATRIX;//perspective(45.0f, ratio, 0.1f, 10.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
 
     // create the model matrix (remember OpenGL is right handed)
     // accumulated transformation
@@ -53,8 +53,6 @@ void Init(GLFWwindow* window) {
     // this unsures that the framebuffer has the same size as the window
     // (see http://www.glfw.org/docs/latest/window.html#window_fbsize)
     glfwGetFramebufferSize(window, &window_width, &window_height);
-    GLuint first_pass_texture_id;
-    GLuint second_pass_texture_id;
     GLuint framebuffer_texture_id = framebuffer.Init(window_width, window_height);
     screenquad.Init(window_width, window_height, framebuffer_texture_id);
 }
@@ -81,7 +79,7 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     window_height = height;
 
     float ratio = window_width / (float) window_height;
-    //projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
 
     glViewport(0, 0, window_width, window_height);
 
