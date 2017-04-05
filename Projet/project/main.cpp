@@ -33,9 +33,6 @@ void Init(GLFWwindow* window) {
     glClearColor(1.0, 1.0, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
 
-    cube.Init();
-    quad.Init();
-
     // setup view and projection matrices
     vec3 cam_pos(2.0f, 2.0f, 2.0f);
     vec3 cam_look(0.0f, 0.0f, 0.0f);
@@ -54,7 +51,8 @@ void Init(GLFWwindow* window) {
     // (see http://www.glfw.org/docs/latest/window.html#window_fbsize)
     glfwGetFramebufferSize(window, &window_width, &window_height);
     GLuint framebuffer_texture_id = framebuffer.Init(window_width, window_height);
-    screenquad.Init(window_width, window_height, framebuffer_texture_id);
+    screenquad.Init(window_width, window_height);
+    quad.Init(framebuffer_texture_id);
 }
 
 void Display() {
@@ -63,7 +61,7 @@ void Display() {
     framebuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix);
+        screenquad.Draw();
     }
     framebuffer.Unbind();
 
@@ -71,6 +69,7 @@ void Display() {
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     screenquad.Draw();
+//    quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix);
 }
 
 // gets called when the windows/framebuffer is resized.
