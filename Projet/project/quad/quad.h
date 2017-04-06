@@ -24,6 +24,34 @@ class Quad {
             }
             glUseProgram(program_id_);
 
+            // light?
+            glm::vec3 La = glm::vec3(1.0f, 1.0f, 1.0f);
+            glm::vec3 Ld = glm::vec3(1.0f, 1.0f, 1.0f);
+            glm::vec3 Ls = glm::vec3(1.0f, 1.0f, 1.0f);
+            glm::vec3 light_pos = glm::vec3(0.0f, 0.0f, 4.0f);
+            GLuint light_pos_id = glGetUniformLocation(program_id_, "light_pos");
+            GLuint La_id = glGetUniformLocation(program_id_, "La");
+            GLuint Ld_id = glGetUniformLocation(program_id_, "Ld");
+            GLuint Ls_id = glGetUniformLocation(program_id_, "Ls");
+            glUniform3fv(light_pos_id, ONE, glm::value_ptr(light_pos));
+            glUniform3fv(La_id, ONE, glm::value_ptr(La));
+            glUniform3fv(Ld_id, ONE, glm::value_ptr(Ld));
+            glUniform3fv(Ls_id, ONE, glm::value_ptr(Ls));
+
+            //material?
+            glm::vec3 ka = glm::vec3(1.0f, 1.0f, 1.0f);
+            glm::vec3 kd = glm::vec3(1.0f, 1.0f, 1.0f);
+            glm::vec3 ks = glm::vec3(1.0f, 1.0f, 1.0f);
+            float alpha = 60.0f;
+            GLuint ka_id = glGetUniformLocation(program_id_, "ka");
+            GLuint kd_id = glGetUniformLocation(program_id_, "kd");
+            GLuint ks_id = glGetUniformLocation(program_id_, "ks");
+            GLuint alpha_id = glGetUniformLocation(program_id_, "alpha");
+            glUniform3fv(ka_id, ONE, glm::value_ptr(ka));
+            glUniform3fv(kd_id, ONE, glm::value_ptr(kd));
+            glUniform3fv(ks_id, ONE, glm::value_ptr(ks));
+            glUniform1f(alpha_id, alpha);
+
             // vertex one vertex Array
             glGenVertexArrays(1, &vertex_array_id_);
             glBindVertexArray(vertex_array_id_);
@@ -149,6 +177,12 @@ class Quad {
             glm::mat4 MVP = projection*view*model;
             GLuint MVP_id = glGetUniformLocation(program_id_, "MVP");
             glUniformMatrix4fv(MVP_id, 1, GL_FALSE, value_ptr(MVP));
+            GLuint model_id = glGetUniformLocation(program_id_,"model");
+            glUniformMatrix4fv(model_id, ONE, DONT_TRANSPOSE, glm::value_ptr(model));
+            GLuint view_id = glGetUniformLocation(program_id_,"view");
+            glUniformMatrix4fv(view_id, ONE, DONT_TRANSPOSE, glm::value_ptr(view));
+            GLuint projection_id = glGetUniformLocation(program_id_,"projection");
+            glUniformMatrix4fv(projection_id, ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
 
             // draw
             //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
