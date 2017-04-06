@@ -8,9 +8,10 @@ out vec3 color;
 uniform float tex_width;
 uniform float tex_height;
 //uniform float permutation[256];
-uniform int p[512];
+uniform int[512] p;
 
-const int repeat = 256;
+const int repeat = 255;
+const int rep = 5;
 
 
 int inc(int num) {
@@ -92,7 +93,6 @@ float OctavePerlin(float x, float y, int octaves, float persistence) {
 }
 
 void main() {
-    float color1 = OctavePerlin(uv.x, uv.y, 1, 0.7);
-    color = vec3(color1, color1, color1);
+    color = vec3(OctavePerlin(uv.x*rep, uv.y*rep, 6, 0.4));
 }
 
