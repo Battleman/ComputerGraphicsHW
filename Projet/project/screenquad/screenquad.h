@@ -32,9 +32,6 @@ class ScreenQuad {
     public:
         void Init(float screenquad_width, float screenquad_height) {
 
-            for(int x=0;x<512;x++) {
-                    p[x] = permutation[x%256];
-            }
 
             // set screenquad size
             this->screenquad_width_ = screenquad_width;
@@ -48,6 +45,11 @@ class ScreenQuad {
             }
 
             glUseProgram(program_id_);
+
+            //Send the permutation table
+            for(int x=0;x<512;x++) {
+                p[x] = permutation[x%256];
+            }
 
             glUniform1iv(glGetUniformLocation(program_id_, "p"), 512, &p[0]);
 
