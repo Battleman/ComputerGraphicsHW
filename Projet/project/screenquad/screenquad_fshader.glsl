@@ -92,7 +92,7 @@ float OctavePerlin(float x, float y, int octaves, float persistence) {
 }
 
 void main() {
-    float color1 = Perlin(uv[0], uv[1]);
+    float color1 = OctavePerlin(uv.x, uv.y, 1, 0.7);
     color = vec3(color1, color1, color1);
 }
 

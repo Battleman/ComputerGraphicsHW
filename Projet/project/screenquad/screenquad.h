@@ -32,6 +32,14 @@ class ScreenQuad {
     public:
         void Init(float screenquad_width, float screenquad_height) {
 
+            for(int x=0;x<512;x++) {
+                    p[x] = permutation[x%256];
+            }
+//            for(int x=0;x<512;x++) {
+//                std::cout << p[x] << std::endl;
+//            }
+            glUniform1iv(glGetUniformLocation(program_id_, "p"), 512, &p[0]);
+
 //            glUniform1iv(glGetUniformLocation(program_id_, "permutation"), 256, permutation);
 
             // set screenquad size
@@ -113,12 +121,6 @@ class ScreenQuad {
         void Draw() {
             glUseProgram(program_id_);
             glBindVertexArray(vertex_array_id_);
-
-            for(int x=0;x<512;x++) {
-                    p[x] = permutation[x%256];
-            }
-
-            glUniform1iv(glGetUniformLocation(program_id_, "p"), 512, p);
 
             // window size uniforms
             glUniform1f(glGetUniformLocation(program_id_, "tex_width"),

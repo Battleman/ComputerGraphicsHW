@@ -68,8 +68,8 @@ void Display() {
     // render to Window
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    screenquad.Draw();
-//    quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix);
+//    screenquad.Draw();
+    quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix);
 }
 
 // gets called when the windows/framebuffer is resized.
