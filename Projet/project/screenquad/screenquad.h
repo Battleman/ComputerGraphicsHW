@@ -35,12 +35,6 @@ class ScreenQuad {
             for(int x=0;x<512;x++) {
                     p[x] = permutation[x%256];
             }
-//            for(int x=0;x<512;x++) {
-//                std::cout << p[x] << std::endl;
-//            }
-            glUniform1iv(glGetUniformLocation(program_id_, "p"), 512, &p[0]);
-
-//            glUniform1iv(glGetUniformLocation(program_id_, "permutation"), 256, permutation);
 
             // set screenquad size
             this->screenquad_width_ = screenquad_width;
@@ -54,6 +48,8 @@ class ScreenQuad {
             }
 
             glUseProgram(program_id_);
+
+            glUniform1iv(glGetUniformLocation(program_id_, "p"), 512, &p[0]);
 
             // vertex one vertex Array
             glGenVertexArrays(1, &vertex_array_id_);
