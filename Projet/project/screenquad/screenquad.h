@@ -32,6 +32,7 @@ class ScreenQuad {
     public:
         void Init(float screenquad_width, float screenquad_height) {
 
+
             // set screenquad size
             this->screenquad_width_ = screenquad_width;
             this->screenquad_height_ = screenquad_height;
@@ -47,15 +48,10 @@ class ScreenQuad {
 
             //Send the permutation table
             for(int x=0;x<512;x++) {
-                int value = rand() % 255;
                 p[x] = permutation[x%256];
-            }
-            for(int x=0;x<512;x++) {
-                std::cout << p[x] << std::endl;
             }
 
             glUniform1iv(glGetUniformLocation(program_id_, "p"), 512, &p[0]);
-
 
             // vertex one vertex Array
             glGenVertexArrays(1, &vertex_array_id_);

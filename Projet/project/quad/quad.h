@@ -40,7 +40,11 @@ class Quad {
 
             //material?
             glm::vec3 ka = glm::vec3(1.0f, 1.0f, 1.0f);
+<<<<<<< HEAD
             glm::vec3 kd = glm::vec3(0.6f, 0.95f, 1.0f);
+=======
+            glm::vec3 kd = glm::vec3(1.0f, 1.0f, 1.0f);
+>>>>>>> 4f501e065eede3a4961e21851309cfc2a1f2a204
             glm::vec3 ks = glm::vec3(1.0f, 1.0f, 1.0f);
             float alpha = 60.0f;
             GLuint ka_id = glGetUniformLocation(program_id_, "ka");

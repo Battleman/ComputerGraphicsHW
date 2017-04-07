@@ -10,9 +10,7 @@ uniform float tex_height;
 //uniform float permutation[256];
 uniform int[512] p;
 
-const int repeat = 255;
-const int rep = 5;
-
+int repeat = 256;
 
 int inc(int num) {
     num++;
@@ -40,7 +38,7 @@ float grad(int hash, float x, float y) {
     } else if(h == 0x3){
         return -x - y;
     }
-    return 0;
+    return 0.0f;
 }
 
 float Perlin(float x, float y) {
@@ -75,6 +73,17 @@ float Perlin(float x, float y) {
     return (noise+1)/2;
 }
 
+float fBm(float x, float y, float H, float lacunarity, int octaves) {
+    float value = 0.0;
+    /* inner loop of fractal construction */
+    for (int i = 0; i < octaves; i++) {
+        value += Perlin(x, y) * pow(lacunarity, -H*i);
+        x *= lacunarity;
+        y *= lacunarity;
+    }
+    return value;
+}
+
 float OctavePerlin(float x, float y, int octaves, float persistence) {
     float total = 0;
     float frequency = 1;
@@ -89,10 +98,15 @@ float OctavePerlin(float x, float y, int octaves, float persistence) {
         frequency *= 2;
     }
 
+
+
     return total/maxValue;
 }
 
 void main() {
-    color = vec3(OctavePerlin(uv.x*rep, uv.y*rep, 6, 0.4));
+//    float color1 = OctavePerlin(4*uv.x, 4*uv.y, 10, 0.3);
+    float color1 = fBm(uv.x, uv.y, 0.85, 3, 4);
+    color = vec3(color1);
+
 }
 
