@@ -40,11 +40,7 @@ class Quad {
 
             //material?
             glm::vec3 ka = glm::vec3(1.0f, 1.0f, 1.0f);
-<<<<<<< HEAD
             glm::vec3 kd = glm::vec3(0.6f, 0.95f, 1.0f);
-=======
-            glm::vec3 kd = glm::vec3(1.0f, 1.0f, 1.0f);
->>>>>>> 4f501e065eede3a4961e21851309cfc2a1f2a204
             glm::vec3 ks = glm::vec3(1.0f, 1.0f, 1.0f);
             float alpha = 60.0f;
             GLuint ka_id = glGetUniformLocation(program_id_, "ka");
@@ -55,6 +51,8 @@ class Quad {
             glUniform3fv(kd_id, ONE, glm::value_ptr(kd));
             glUniform3fv(ks_id, ONE, glm::value_ptr(ks));
             glUniform1f(alpha_id, alpha);
+
+
 
             // vertex one vertex Array
             glGenVertexArrays(1, &vertex_array_id_);
