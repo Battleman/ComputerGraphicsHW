@@ -70,7 +70,7 @@ float Perlin(float x, float y) {
              u);
     noise = mix(st, uv, v);
 
-    return (noise+1)/2;
+    return noise;
 }
 
 float fBm(float x, float y, float H, float lacunarity, int octaves) {
