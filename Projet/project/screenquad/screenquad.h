@@ -48,7 +48,8 @@ class ScreenQuad {
 
             //Send the permutation table
             for(int x=0;x<512;x++) {
-                p[x] = permutation[x%256];
+                int random = rand() % 256;
+                p[x] = permutation[random];
             }
 
             glUniform1iv(glGetUniformLocation(program_id_, "p"), 512, &p[0]);

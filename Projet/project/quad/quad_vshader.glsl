@@ -23,12 +23,16 @@ void main() {
 
     height = texture(tex,uv).r;
     //gl_Position = MVP * vec4(position[0], position[1], texture(tex, uv).r, 1.0);
-    vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
+    if(height < -0.45) {
+        vpoint_mv = MV * vec4(position.x,position.y,-0.45, 1.0);
+    } else {
+        vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
+    }
     gl_Position = projection * vpoint_mv;
     light_dir = normalize(light_pos-vec3(vpoint_mv));
     view_dir = normalize(-vec3(vpoint_mv));
 
-    float offset = 1.0f/float(triangles_number*0.1);
+    float offset = 1.0f/float(triangles_number*1.0);
     vec4 X0point_mv = MV * vec4(position.x-offset,position.y,texture(tex,vec2(((position.x-offset)/2.0)+0.5,uv.y)).r, 1.0);
     vec4 Y0point_mv = MV * vec4(position.x,position.y-offset,texture(tex,vec2(uv.x,((position.y-offset)/2.0)+0.5)).r, 1.0);
     vec4 X1point_mv = MV * vec4(position.x+offset,position.y,texture(tex,vec2(((position.x+offset)/2.0)+0.5,uv.y)).r, 1.0);

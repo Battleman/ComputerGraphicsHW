@@ -63,7 +63,7 @@ class Quad {
                 std::vector<GLfloat> vertices;
                 std::vector<GLuint> indices;
 
-                int grid_dim = 1024;
+                int grid_dim = 512;
 
                 GLuint grim_dim_id = glGetUniformLocation(program_id_, "triangles_number");
                 glUniform1i(grim_dim_id, grid_dim);

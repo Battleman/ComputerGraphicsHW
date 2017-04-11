@@ -1,7 +1,7 @@
 #version 330
 
 in vec3 material;
-in vec3 normal_mv;
+//in vec3 normal_mv;
 in vec4 vpoint_mv;
 in vec3 light_dir, view_dir;
 in float height;
@@ -17,9 +17,9 @@ void main() {
     //float value = texture(tex,uv).r;
     //color = vec3(value, value, value);
 
-//    vec3 X = vec3(dFdx(vpoint_mv));
-//    vec3 Y = vec3(dFdy(vpoint_mv));
-//    vec3 normal_mv = normalize(cross(X,Y));
+    vec3 X = vec3(dFdx(vpoint_mv));
+    vec3 Y = vec3(dFdy(vpoint_mv));
+    vec3 normal_mv = normalize(cross(X,Y));
 
 
     //Here I ll be using a gaussian function to make the color change smoother
@@ -51,7 +51,6 @@ void main() {
     }
 
     vec3 material = height_material;
-    //material = vec3(0.0,1.0,0.0);
 
     vec3 res_color = vec3(0.0f);
     //I'm keeping ambient and specular in case we need them for later
