@@ -1,53 +1,51 @@
 #version 330
 
 in vec3 material;
-//in vec3 normal_mv;
 in vec4 vpoint_mv;
 in vec3 light_dir, view_dir;
 in float height;
 
 uniform vec3 La, Ld, Ls;
-uniform vec3 ka, kd, ks;
 uniform float alpha;
 uniform sampler2D tex;
 
 out vec3 color;
 
 void main() {
-    //float value = texture(tex,uv).r;
-    //color = vec3(value, value, value);
-
     vec3 X = vec3(dFdx(vpoint_mv));
     vec3 Y = vec3(dFdy(vpoint_mv));
     vec3 normal_mv = normalize(cross(X,Y));
-
 
     //Here I ll be using a gaussian function to make the color change smoother
     vec3 height_material = vec3(0.0,0.0,0.0);
     float variance = 0.0;
     float color_height = 0.0;
-    //ground: brown, at height -0.35, spread: 0.1
-    variance = 0.1;
+
+    //sand: yellow, at height -0.40, spread: -0.45 to -0.40
+    variance = 0.05;
+    color_height = -0.45;
+    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(0.65,0.65,0.0);
+    //dirt: brown, at height -0.20, spread: -0.40 to -0.30
+    variance = 0.05;
     color_height = -0.35;
     height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(0.3,0.2,0.0);
-    //sand: yellow, at height -0.25, spread: 0.05
+    //grass/trees: green, at height -0.25, spread: -0.30 to -0.20
     variance = 0.05;
     color_height = -0.25;
-    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(0.8,0.8,0.0);
-    //grass: green, at height -0.15, spread: 0.075
-    variance = 0.075;
-    color_height = -0.15;
-    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(0.2,0.8,0.0);
-    //mountain: grey, at height 0.2, spread: 0.3
-    variance = 0.3;
-    color_height = 0.2;
+    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(0.0,0.3,0.0);
+    //mountain: grey, at height 0.0, spread: -0.20 to 0.20
+    variance = 0.2;
+    color_height = 0.0;
     height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(0.5,0.5,0.5);
-    //mountain top: white, at height 1.0, spread: 0.7
-    variance = 0.1;
-    color_height = 0.5;
+    //mountain top: white, at height 0.25, spread: 0.20 to 0.25
+    variance = 0.05;
+    color_height = 0.25;
     height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(1.0,1.0,1.0);
     if(height < -0.45) {
-        height_material = vec3(0.0,0.0,1.0); // water
+        height_material = vec3(0.0,0.0,0.7); // water
+    }
+    if(height > 0.25) {
+        height_material = vec3(1.0,1.0,1.0); // snow
     }
 
     vec3 material = height_material;
