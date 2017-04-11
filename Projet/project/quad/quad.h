@@ -62,9 +62,11 @@ class Quad {
             {
                 std::vector<GLfloat> vertices;
                 std::vector<GLuint> indices;
-                // TODO 5: make a triangle grid with dimension 100x100.
-                // always two subsequent entries in 'vertices' form a 2D vertex position.
-                int grid_dim = 512;
+
+                int grid_dim = 1024;
+
+                GLuint grim_dim_id = glGetUniformLocation(program_id_, "triangles_number");
+                glUniform1i(grim_dim_id, grid_dim);
 
                 // the given code below are the vertices for a simple quad.
                 // your grid should have the same dimension as that quad, i.e.,
@@ -75,6 +77,7 @@ class Quad {
                 //unwanted edges on the board. In the border the triangles are
                 //half the size because the grid must be a square, so their vertices
                 //are outside the second loop.
+
                 int index = 0;
                 vertices.push_back(-1.0f);
                 vertices.push_back(-1.0f);
@@ -120,6 +123,8 @@ class Quad {
                     }
 
                 }
+
+
 
                 num_indices_ = indices.size();
 
