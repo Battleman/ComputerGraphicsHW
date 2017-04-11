@@ -50,7 +50,7 @@ void Init(GLFWwindow* window) {
     // this unsures that the framebuffer has the same size as the window
     // (see http://www.glfw.org/docs/latest/window.html#window_fbsize)
     glfwGetFramebufferSize(window, &window_width, &window_height);
-    GLuint framebuffer_texture_id = framebuffer.Init(window_width, window_height);
+    GLuint framebuffer_texture_id = framebuffer.Init(window_width, window_height, true);
     screenquad.Init(window_width, window_height);
     quad.Init(framebuffer_texture_id);
 }

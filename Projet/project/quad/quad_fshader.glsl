@@ -17,6 +17,8 @@ out vec3 color;
 void main() {
     //float value = texture(tex,uv).r;
     //color = vec3(value, value, value);
+//    vec4 v = normalize(vpoint_mv);
+//    vec3 l = normalize(light_dir);
     vec3 X = vec3(dFdx(vpoint_mv));
     vec3 Y = vec3(dFdy(vpoint_mv));
     vec3 normal_mv = normalize(cross(X,Y));
