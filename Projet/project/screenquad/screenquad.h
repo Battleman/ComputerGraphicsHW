@@ -1,6 +1,8 @@
 #pragma once
 #include "icg_helper.h"
-
+#include <time.h>
+#include <stdlib.h>
+//#define DEBUG_SEED 0
 class ScreenQuad {
 
     private:
@@ -47,8 +49,15 @@ class ScreenQuad {
             glUseProgram(program_id_);
 
             //Send the permutation table
+#ifdef DEBUG_SEED
+            srand(DEBUG_SEED);
+#else
+            srand(time(NULL));
+#endif
             for(int x=0;x<512;x++) {
+                std::cout << time(NULL) << std::endl;
                 int random = rand() % 256;
+                std::cout << random << std::endl;
                 p[x] = permutation[random];
             }
 
