@@ -7,6 +7,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "framebuffer.h"
+#include "waterbuffer.h"
 
 #include "cube/cube.h"
 #include "quad/quad.h"
@@ -15,11 +16,13 @@
 
 Cube cube;
 Quad quad;
+Quad water;
 
 int window_width = 800;
 int window_height = 600;
 
 FrameBuffer framebuffer;
+WaterBuffer waterbuffer;
 ScreenQuad screenquad;
 Trackball trackball;
 
