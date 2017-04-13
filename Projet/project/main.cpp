@@ -14,7 +14,7 @@
 #include "screenquad/screenquad.h"
 #include "trackball.h"
 
-Cube cube;
+//Cube cube;
 Quad quad;
 Quad water;
 
@@ -30,7 +30,7 @@ using namespace glm;
 
 mat4 projection_matrix;
 mat4 view_matrix;
-mat4 cube_model_matrix;
+//mat4 cube_model_matrix;
 mat4 trackball_matrix;
 mat4 old_trackball_matrix;
 
@@ -52,8 +52,8 @@ void Init(GLFWwindow* window) {
 
     // create the model matrix (remember OpenGL is right handed)
     // accumulated transformation
-    cube_model_matrix = scale(IDENTITY_MATRIX, vec3(0.5));
-    cube_model_matrix = translate(cube_model_matrix, vec3(0.0, 0.0, 0.6));
+//    cube_model_matrix = scale(IDENTITY_MATRIX, vec3(0.5));
+//    cube_model_matrix = translate(cube_model_matrix, vec3(0.0, 0.0, 0.6));
 
     // on retina/hidpi displays, pixels != screen coordinates
     // this unsures that the framebuffer has the same size as the window
@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
 
     // cleanup
     quad.Cleanup();
-    cube.Cleanup();
+//    cube.Cleanup();
     framebuffer.Cleanup();
     screenquad.Cleanup();
 
