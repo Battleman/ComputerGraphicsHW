@@ -12,10 +12,11 @@ class Quad {
         GLuint vertex_buffer_object_index_;     // memory buffer for indices
         GLuint texture_id_;             // texture ID
         GLuint num_indices_;                    // number of vertices to render
+        float is_water_;
 
     public:
 
-        void Init(GLuint texture) {
+        void Init(GLuint texture, float is_water) {
             // compile the shaders
             program_id_ = icg_helper::LoadShaders("quad_vshader.glsl",
                                                   "quad_fshader.glsl");
@@ -37,6 +38,11 @@ class Quad {
             glUniform3fv(La_id, ONE, glm::value_ptr(La));
             glUniform3fv(Ld_id, ONE, glm::value_ptr(Ld));
             glUniform3fv(Ls_id, ONE, glm::value_ptr(Ls));
+
+            // 0: False, 1: True
+            is_water_ = is_water;
+            std::cout << is_water_ << std::endl;
+            glUniform1f(glGetUniformLocation(program_id_, "isWater"), is_water_);
 
             //material?
             glm::vec3 ka = glm::vec3(1.0f, 1.0f, 1.0f);
