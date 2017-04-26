@@ -11,8 +11,9 @@ class Quad {
         GLuint vertex_buffer_object_position_;  // memory buffer for positions
         GLuint vertex_buffer_object_index_;     // memory buffer for indices
         GLuint texture_id_;             // texture ID
-        GLuint num_indices_;                    // number of vertices to render
         float is_water_;
+        GLuint image_texture_id_[3];    // image texture ID
+        GLuint num_indices_;            // number of vertices to render
 
     public:
 
@@ -153,12 +154,58 @@ class Quad {
                                       ZERO_STRIDE, ZERO_BUFFER_OFFSET);
             }
 
-                // load/Assign texture
-                this->texture_id_ = texture;
-                glBindTexture(GL_TEXTURE_2D, texture_id_);
-                GLuint tex_id = glGetUniformLocation(program_id_, "tex");
-                glUniform1i(tex_id, 0 /*GL_TEXTURE0*/);
+            // load/Assign first texture
+            this->texture_id_ = texture;
+            glBindTexture(GL_TEXTURE_2D, texture_id_);
+            GLuint tex_id = glGetUniformLocation(program_id_, "tex");
+            glUniform1i(tex_id, 0 /*GL_TEXTURE0*/);
+
+            string texture_filename[3];
+            texture_filename[0] = "RockTexture.jpg";
+            texture_filename[1] = "ForestTexture.jpg";
+            texture_filename[2] = "SandTexture.jpg";
+
+
+            GLchar* texture_uniform[3];
+            texture_uniform[0] = "tex2";
+            texture_uniform[1] = "tex3";
+            texture_uniform[2] = "tex4";
+
+            GLuint texture_ids[3];
+
+            // load image texture
+            for(int i = 1; i<4; i++) {
+                int width;
+                int height;
+                int nb_component;
+                //string texture_filename = "RockTexture.jpg";
+                stbi_set_flip_vertically_on_load(1);
+                unsigned char* image = stbi_load(texture_filename[i-1].c_str(), &width, &height, &nb_component, 0);
+                if(image == nullptr) {
+                    throw(std::string("Failed to load texture"));
+                }
+                glGenTextures(1, &image_texture_id_[i-1]);
+                glBindTexture(GL_TEXTURE_2D, image_texture_id_[i-1]);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                if(nb_component == 3) {
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+                                 GL_RGB, GL_UNSIGNED_BYTE, image);
+                } else if(nb_component == 4) {
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                                 GL_RGBA, GL_UNSIGNED_BYTE, image);
+                }
+                texture_ids[i-1] = glGetUniformLocation(program_id_, texture_uniform[i-1]);
+                glUniform1i(texture_ids[i-1], i /*GL_TEXTURE i*/);
+                // cleanup
                 glBindTexture(GL_TEXTURE_2D, 0);
+                stbi_image_free(image);
+            }
+
+            for(int i = 1; i<4; i++) {
+                glActiveTexture(GL_TEXTURE0 + i);
+                glBindTexture(GL_TEXTURE_2D, image_texture_id_[i-1]);
+            }
 
             // to avoid the current object being polluted
             glBindVertexArray(0);

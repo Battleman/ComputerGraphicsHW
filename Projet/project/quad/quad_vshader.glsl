@@ -13,6 +13,9 @@ uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
 uniform sampler2D tex;
+uniform sampler2D tex2;
+uniform sampler2D tex3;
+uniform sampler2D tex4;
 uniform vec3 light_pos;
 uniform int triangles_number;
 
@@ -45,5 +48,39 @@ void main() {
         light_dir = normalize(light_pos-vec3(vpoint_mv));
         view_dir = normalize(-vec3(vpoint_mv));
     }
+
+    //Next I'll be using a gaussian function to make the color changes smoother
+    vec3 height_material = vec3(0.0,0.0,0.0);
+    float variance = 0.0;
+    float color_height = 0.0;
+
+    //sand: yellow, at height -0.45, spread: -0.45 to -0.35
+    variance = 0.1;
+    color_height = -0.45;
+    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * texture(tex4,uv).rgb;
+    //dirt: brown, at height -0.30, spread: -0.35 to -0.25
+    variance = 0.05;
+    color_height = -0.30;
+    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(0.3,0.2,0.0);
+    //grass/trees: green, at height -0.15, spread: -0.25 to -0.05
+    variance = 0.1;
+    color_height = -0.15;
+    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * texture(tex3,uv).rgb;
+    //mountain: grey, at height 0.15, spread: -0.05 to 0.35
+    variance = 0.20;
+    color_height = 0.15;
+    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * texture(tex2,uv).rgb;
+    //mountain top: white, at height 0.40, spread: 0.35 to 0.40
+    variance = 0.05;
+    color_height = 0.40;
+    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * vec3(1.0,1.0,1.0);
+    if(height < -0.45) {
+        height_material = vec3(0.0,0.0,0.7); // water
+    }
+    if(height > 0.40) {
+        height_material = exp((-pow((height-color_height),2))/(2*0.4*0.4)) * vec3(1.0,1.0,1.0); // snow
+    }
+
+    material = height_material;
 
 }
