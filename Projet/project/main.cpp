@@ -34,9 +34,15 @@ mat4 view_matrix;
 mat4 trackball_matrix;
 mat4 old_trackball_matrix;
 mat4 view_matrix_mir;
+mat4 reflect_mat;
+mat4 mirror_mat;
 
+double water_height = 0.0;
+vec4 r_plane(0.0,0.0,1.0,0.0); //TODO paramétrer la hauteur de l'eau
+vec4 initial_rplane(0.0,0.0,1.0,0);
+vec3 translate_vector_mir(0.0f, 0.0f, 4.0f);
 vec3 cam_pos(2.0f, 2.0f, 2.0f);
-vec3 cam_pos_mir(-2.0f, 2.0f, -1.55f);
+vec3 cam_pos_mir(2.0f, 2.0f, -2.9f);
 vec3 cam_look(0.0f, 0.0f, 0.0f);
 vec3 cam_up(0.0f, 0.0f, 1.0f);
 
@@ -48,13 +54,24 @@ void Init(GLFWwindow* window) {
     glEnable(GL_DEPTH_TEST);
 
     // setup view and projection matrices
-    view_matrix_mir = lookAt(cam_pos_mir, cam_look, cam_up);
+    //view_matrix_mir = lookAt(cam_pos_mir, cam_look, cam_up);
     view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
-    view_matrix = lookAt(cam_pos, cam_look, cam_up);
+    view_matrix_mir = lookAt(vec3(0.0,0.0,-4.0), vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
+    //view_matrix = lookAt(cam_pos, cam_look, cam_up);
     view_matrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.001f, 10.0f);
 
+    reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
+                        vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
+                        vec4( -2*r_plane.x*r_plane.z, -2*r_plane.y*r_plane.z, 1.0-2*r_plane.z*r_plane.z, 0.0),
+                        vec4( -2*r_plane.x*r_plane.w, -2*r_plane.y*r_plane.w, -2*r_plane.z*r_plane.w, 1.0));
+    //view_matrix_mir = reflect_mat*view_matrix;
+
+    mirror_mat = mat4(  vec4( 1.0, 0.0, 0.0, 0.0),
+                        vec4( 0.0, 1.0, 0.0, 0.0),
+                        vec4( 0.0, 0.0, 1.0, 0.0),
+                        vec4( 0.0, 0.0, 0.0, 1.0));
     // create the model matrix (remember OpenGL is right handed)
     // accumulated transformation
 //    cube_model_matrix = scale(IDENTITY_MATRIX, vec3(0.5));
@@ -72,9 +89,31 @@ void Init(GLFWwindow* window) {
 
 }
 
+void RecomputeReflectionViewMat() {
+    r_plane = initial_rplane*trackball_matrix;
+    vec3 r_normal = normalize(vec3(r_plane.x,r_plane.y,r_plane.z));
+    cam_pos_mir = cam_pos - 2*dot(cam_pos,r_normal)*r_normal;
+    //reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
+    //                    vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
+    //                    vec4( -2*r_plane.x*r_plane.z, -2*r_plane.y*r_plane.z, 1.0-2*r_plane.z*r_plane.z, 0.0),
+    //                    vec4( -2*r_plane.x*r_plane.w, -2*r_plane.y*r_plane.w, -2*r_plane.z*r_plane.w, 1.0));
+    //view_matrix_mir = lookAt(cam_pos_mir, cam_look, r_normal);
+    //view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, 4.0f));
+    //view_matrix_mir = translate(mat4(1.0f),translate_vector_mir);
+    //view_matrix_mir = reflect_mat*view_matrix;
+    reflect_mat = mat4(  vec4( 1.0, 0.0, 0.0, 0.0),
+                         vec4( 0.0, 1.0, 0.0, 0.0),
+                         vec4( 0.0, 0.0, -1.0, 0.0),
+                         vec4( 0.0, 0.0, 0.0, 1.0));
+    //reflect_mat = glm::rotate(reflect_mat,3.14159f,vec3(0,1,0));
+    //reflect_mat = glm::rotate(reflect_mat,-3.14159f/2.0f,vec3(0,0,1));
+    //reflect_mat[0][0] = - reflect_mat[0][0];
+}
+
 void Display() {
     // render to framebuffer
 
+    //Perlin Noise
     framebuffer.Clear();
     framebuffer.Bind();
     {
@@ -83,18 +122,26 @@ void Display() {
     }
     framebuffer.Unbind();
 
+    RecomputeReflectionViewMat();
+    //Draw Reflection
     waterbuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        quad.Draw(trackball_matrix, view_matrix_mir, projection_matrix);
+        quad.Draw(trackball_matrix*reflect_mat,view_matrix, projection_matrix,1);
     }
     waterbuffer.Unbind();
 
+    //Draw terrain and water plane
+
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    quad.Draw(trackball_matrix, view_matrix, projection_matrix);
-    water.Draw(trackball_matrix, view_matrix, projection_matrix);
+    quad.Draw(trackball_matrix, view_matrix, projection_matrix,0);
+    water.Draw(trackball_matrix, view_matrix, projection_matrix,0);
+
 }
+
+
+
 
 // gets called when the windows/framebuffer is resized.
 void ResizeCallback(GLFWwindow* window, int width, int height) {
@@ -180,8 +227,11 @@ void MousePos(GLFWwindow* window, double x, double y) {
         vec3 translate_vector = vec3(0.0,0.0,view_matrix[3][2]+((p[1]-zoom)*constant_factor));
         view_matrix = translate(mat4(1.0f),translate_vector);
 
-        vec3 translate_vector_mir = vec3(0.0,0.0,view_matrix_mir[3][2]+((p[1]-zoom)*constant_factor));
+        //view_matrix = view_matrix* (float)(1+(translate_vector.length()/4.0));
+
+        translate_vector_mir = vec3(0.0,0.0,view_matrix_mir[3][2]+((p[1]-zoom)*constant_factor));
         view_matrix_mir = translate(mat4(1.0f),translate_vector_mir);
+        //view_matrix_mir = reflect_mat*view_matrix_mir;
         zoom = p[1];
         //I'd find it more intuitive to zoom out and in by scaling the object, why don't we do that?
 

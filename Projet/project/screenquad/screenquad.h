@@ -2,7 +2,8 @@
 #include "icg_helper.h"
 #include <time.h>
 #include <stdlib.h>
-//#define DEBUG_SEED 0
+#define DEBUG_SEED 116
+
 class ScreenQuad {
 
     private:

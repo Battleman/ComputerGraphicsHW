@@ -225,13 +225,18 @@ class Quad {
 
         void Draw(const glm::mat4 &model,
                   const glm::mat4 &view,
-                  const glm::mat4 &projection) {
+                  const glm::mat4 &projection,
+                  const int discard) {
             glUseProgram(program_id_);
             glBindVertexArray(vertex_array_id_);
 
             // bind textures
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture_id_);
+
+            // 0: False, 1: True
+            GLuint discard_loc = glGetUniformLocation(program_id_,"discard_pix");
+            glUniform1i(discard_loc,discard);
 
             // setup MVP
             glm::mat4 MVP = projection*view*model;
@@ -244,10 +249,13 @@ class Quad {
             GLuint projection_id = glGetUniformLocation(program_id_,"projection");
             glUniformMatrix4fv(projection_id, ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
 
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             // draw
             //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             glDrawElements(GL_TRIANGLE_STRIP, num_indices_, GL_UNSIGNED_INT, 0);
 
+            glDisable(GL_BLEND);
             glBindVertexArray(0);
             glUseProgram(0);
         }
