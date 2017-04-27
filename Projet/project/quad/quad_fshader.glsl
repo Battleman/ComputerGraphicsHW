@@ -33,10 +33,10 @@ void main() {
         float _u = gl_FragCoord.x/window_width;
         float _v = gl_FragCoord.y/window_height;
 
-        vec3 color_from_texture = vec3(0.5, 0.5, 0.85, 0.0);
-//        vec3 color_from_mirror = texture(tex,vec2(_u, 1-_v)).rgb;
-//        color = mix(color_from_texture, color_from_mirror, vec3(.15));
-        color = color_from_texture;
+        vec3 color_from_texture = vec3(0.5, 0.5, 0.85);
+        vec3 color_from_mirror = texture(tex,vec2(_u, 1-_v)).rgb;
+        color = mix(color_from_texture, color_from_mirror, vec3(.15));
+//        color = color_from_texture;
     }
 
 

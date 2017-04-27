@@ -78,7 +78,7 @@ void main() {
         height_material = vec3(0.0,0.0,0.7); // water
     }
     if(height > 0.40) {
-        height_material = exp((-pow((height-color_height),2))/(2*0.4*0.4)) * vec3(1.0,1.0,1.0); // snow
+        height_material = vec3(1.0,1.0,1.0); // snow
     }
 
     material = height_material;

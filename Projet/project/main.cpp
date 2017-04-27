@@ -36,7 +36,7 @@ mat4 old_trackball_matrix;
 mat4 view_matrix_mir;
 
 vec3 cam_pos(2.0f, 2.0f, 2.0f);
-vec3 cam_pos_mir(2.0f, 2.0f, -2.0f);
+vec3 cam_pos_mir(-2.0f, 2.0f, -1.55f);
 vec3 cam_look(0.0f, 0.0f, 0.0f);
 vec3 cam_up(0.0f, 0.0f, 1.0f);
 
@@ -179,6 +179,9 @@ void MousePos(GLFWwindow* window, double x, double y) {
         vec2 p = TransformScreenCoords(window, x, y);
         vec3 translate_vector = vec3(0.0,0.0,view_matrix[3][2]+((p[1]-zoom)*constant_factor));
         view_matrix = translate(mat4(1.0f),translate_vector);
+
+        vec3 translate_vector_mir = vec3(0.0,0.0,view_matrix_mir[3][2]+((p[1]-zoom)*constant_factor));
+        view_matrix_mir = translate(mat4(1.0f),translate_vector_mir);
         zoom = p[1];
         //I'd find it more intuitive to zoom out and in by scaling the object, why don't we do that?
 
