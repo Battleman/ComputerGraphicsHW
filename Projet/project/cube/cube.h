@@ -1,6 +1,7 @@
 #pragma once
 #include "icg_helper.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 static const unsigned int NbCubeVertices = 36;
 static const glm::vec3 CubeVertices[] =
@@ -138,6 +139,7 @@ class Cube {
         GLuint program_id_;             // GLSL shader program ID
         GLuint vertex_buffer_object_;   // memory buffer
         GLuint texture_id_;             // texture ID
+        glm::mat4 model_matrix_;        // model matrix
 
     public:
         void Init() {
@@ -185,12 +187,12 @@ class Cube {
                                       DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
             }
 
-            // load texture
+            // load texture$
             {
                 int width;
                 int height;
                 int nb_component;
-                string texture_filename = "cube_texture.tga";
+                string texture_filename = "skybox_texture.tga";
                 stbi_set_flip_vertically_on_load(1);
                 unsigned char* image = stbi_load(texture_filename.c_str(),
                                                  &width, &height, &nb_component, 0);
@@ -221,9 +223,10 @@ class Cube {
 
             }
 
-            // to avoid the current object being polluted
-            glBindVertexArray(0);
-            glUseProgram(0);
+            // create the model matrix
+            model_matrix_ = glm::scale(IDENTITY_MATRIX, glm::vec3(1.0f));
+            model_matrix_ = glm::translate(model_matrix_,
+                                           glm::vec3(0.0f, 0.0f, 0.6f));
         }
 
         void Cleanup() {
@@ -235,9 +238,7 @@ class Cube {
             glDeleteTextures(1, &texture_id_);
         }
 
-        void Draw(const glm::mat4& model,
-                  const glm::mat4& view,
-                  const glm::mat4& projection) {
+        void Draw(const glm::mat4& view_projection){
             glUseProgram(program_id_);
             glBindVertexArray(vertex_array_id_);
 
@@ -247,16 +248,14 @@ class Cube {
 
             // time
             glUniform1f(glGetUniformLocation(program_id_, "time"), glfwGetTime());
-            
+
             // setup MVP
-            glm::mat4 MVP = projection * view * model;
+            glm::mat4 MVP = view_projection * model_matrix_;
             GLuint MVP_id = glGetUniformLocation(program_id_, "MVP");
             glUniformMatrix4fv(MVP_id, 1, GL_FALSE, value_ptr(MVP));
-            
-            // draw (notice the difference between this draw call and the one in
-            //       the other version of the cube, where we have indices and we
-            //       use glDrawElements)
-            glDrawArrays(GL_TRIANGLES,0,NbCubeVertices);
+
+            // draw
+            glDrawArrays(GL_TRIANGLES,0, NbCubeVertices);
 
             glBindVertexArray(0);
             glUseProgram(0);
