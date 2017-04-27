@@ -38,7 +38,7 @@ void main() {
         float _v = gl_FragCoord.y/window_height;
 
         vec3 res_color = vec3(0.0);
-        vec3 color_from_texture = vec3(0.5, 0.5, 0.85);
+        vec3 color_from_texture = vec3(0.1, 0.1, 0.7);
         vec3 color_from_mirror = texture(tex,vec2(_u, _v)).rgb;
         res_color = mix(color_from_texture, color_from_mirror, vec3(.35));
         color = vec4(res_color.x,res_color.y,res_color.z,0.7);
