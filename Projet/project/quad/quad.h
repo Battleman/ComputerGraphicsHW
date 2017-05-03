@@ -178,7 +178,6 @@ class Quad {
                 int width;
                 int height;
                 int nb_component;
-                //string texture_filename = "RockTexture.jpg";
                 stbi_set_flip_vertically_on_load(1);
                 unsigned char* image = stbi_load(texture_filename[i-1].c_str(), &width, &height, &nb_component, 0);
                 if(image == nullptr) {

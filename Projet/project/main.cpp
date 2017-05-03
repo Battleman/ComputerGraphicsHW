@@ -129,27 +129,25 @@ void Display() {
     framebuffer.Unbind();
 
     RecomputeReflectionViewMat();
+
     //Draw Reflection
-    waterbuffer.Clear();
+    //waterbuffer.Clear();
     waterbuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         quad.Draw(trackball_matrix*reflect_mat,view_matrix, projection_matrix,1);
+        sky.Draw(projection_matrix * view_matrix * trackball_matrix * reflect_mat);
     }
     waterbuffer.Unbind();
 
     //Draw terrain and water plane
-
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-//    quad.Draw(trackball_matrix, view_matrix, projection_matrix);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    sky.Draw(projection_matrix*view_matrix*trackball_matrix);
+
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     quad.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
+    sky.Draw(projection_matrix * view_matrix * trackball_matrix);
     water.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
 
 }
