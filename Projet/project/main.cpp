@@ -7,19 +7,23 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "framebuffer.h"
+#include "waterbuffer.h"
 
-#include "cube/cube.h"
-#include "quad/quad.h"
+//#include "cube/cube.h"
+#include "noise/noise.h"
 #include "screenquad/screenquad.h"
 #include "trackball.h"
+#include "sky/sky.h"
 
-Cube sky;
+Sky sky;
 Quad quad;
+Quad water;
 
 int window_width = 800;
 int window_height = 600;
 
 FrameBuffer framebuffer;
+WaterBuffer waterbuffer;
 ScreenQuad screenquad;
 Trackball trackball;
 
@@ -31,6 +35,12 @@ mat4 cube_scale;
 mat4 cube_model_matrix;
 mat4 trackball_matrix;
 mat4 old_trackball_matrix;
+mat4 view_matrix_mir;
+
+vec3 cam_pos(2.0f, 2.0f, 2.0f);
+vec3 cam_pos_mir(2.0f, 2.0f, -2.0f);
+vec3 cam_look(0.0f, 0.0f, 0.0f);
+vec3 cam_up(0.0f, 0.0f, 1.0f);
 
 double zoom;
 float filter = 2.0f;
@@ -40,9 +50,8 @@ void Init(GLFWwindow* window) {
     glEnable(GL_DEPTH_TEST);
 
     // setup view and projection matrices
-    vec3 cam_pos(2.0f, 2.0f, 2.0f);
-    vec3 cam_look(0.0f, 0.0f, 0.0f);
-    vec3 cam_up(0.0f, 0.0f, 1.0f);
+    view_matrix_mir = lookAt(cam_pos_mir, cam_look, cam_up);
+    view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
     view_matrix = lookAt(cam_pos, cam_look, cam_up);
     view_matrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
     float ratio = window_width / (float) window_height;
@@ -61,13 +70,20 @@ void Init(GLFWwindow* window) {
     // (see http://www.glfw.org/docs/latest/window.html#window_fbsize)
     glfwGetFramebufferSize(window, &window_width, &window_height);
     GLuint framebuffer_texture_id = framebuffer.Init(window_width, window_height, true);
-    screenquad.Init(window_width, window_height);
-    quad.Init(framebuffer_texture_id);
+    GLuint waterbuffer_texture_id = waterbuffer.Init(window_width, window_height, true);
+//    screenquad.Init(window_width, window_height);
+//    quad.Init(framebuffer_texture_id, 0.0);
+//    water.Init(waterbuffer_texture_id, 1.0);
     sky.Init();
 
 }
 
 void Display() {
+    vec3 cam_pos(2.0f, 2.0f, 2.0f);
+    vec3 cam_look(0.0f, 0.0f, 0.0f);
+    vec3 cam_up(0.0f, 0.0f, 1.0f);
+    mat4 view = lookAt(cam_pos, cam_look, cam_up);
+    mat4 view_projection = projection_matrix * view;
     // render to framebuffer
     framebuffer.Clear();
     framebuffer.Bind();
@@ -77,19 +93,28 @@ void Display() {
     }
     framebuffer.Unbind();
 
-    // render to Window
+    waterbuffer.Bind();
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        quad.Draw(trackball_matrix, view_matrix_mir, projection_matrix);
+    }
+    waterbuffer.Unbind();
+
+//    framebuffer.Bind();
+//    {
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        sky.Draw(view_projection);
+//    }
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 //    quad.Draw(trackball_matrix, view_matrix, projection_matrix);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        vec3 cam_pos(2.0f, 2.0f, 2.0f);
-        vec3 cam_look(0.0f, 0.0f, 0.0f);
-        vec3 cam_up(0.0f, 0.0f, 1.0f);
-        mat4 view = lookAt(cam_pos, cam_look, cam_up);
-        mat4 view_projection = projection_matrix * view;
+
 
     sky.Draw(view_projection);
+//    quad.Draw(trackball_matrix, view_matrix, projection_matrix);
+//    water.Draw(trackball_matrix, view_matrix, projection_matrix);
 }
 
 // gets called when the windows/framebuffer is resized.
@@ -107,6 +132,9 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     framebuffer.Cleanup();
     framebuffer.Init(window_width, window_height);
     screenquad.UpdateSize(window_width, window_height);
+
+//    waterbuffer.Cleanup();
+//    waterbuffer.Init(window_width, window_height);
 }
 
 void ErrorCallback(int error, const char* description) {
@@ -242,6 +270,7 @@ int main(int argc, char *argv[]) {
     sky.Cleanup();
     framebuffer.Cleanup();
     screenquad.Cleanup();
+    water.Cleanup();
 
     // close OpenGL window and terminate GLFW
     glfwDestroyWindow(window);

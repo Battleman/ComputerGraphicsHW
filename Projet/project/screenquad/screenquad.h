@@ -2,7 +2,7 @@
 #include "icg_helper.h"
 #include <time.h> //for time and random seem
 #include <stdlib.h> //for random
-//#define DEBUG_SEED 0
+#define DEBUG_SEED 3
 class ScreenQuad {
 
     private:
