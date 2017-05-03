@@ -161,7 +161,7 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     window_height = height;
 
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.001f, 10.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.001f, 40.0f);
 
     glViewport(0, 0, window_width, window_height);
 

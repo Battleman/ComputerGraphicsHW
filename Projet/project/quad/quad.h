@@ -163,6 +163,7 @@ class Quad {
             string texture_filename[3];
             texture_filename[0] = "RockTexture.jpg";
             texture_filename[1] = "ForestTexture.jpg";
+            //texture_filename[1] = "SandTexture.jpg";
             texture_filename[2] = "SandTexture.jpg";
 
 
@@ -201,7 +202,7 @@ class Quad {
                 stbi_image_free(image);
             }
 
-            for(int i = 1; i<4; i++) {
+            for(int i = 1; i<5; i++) {
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D, image_texture_id_[i-1]);
             }

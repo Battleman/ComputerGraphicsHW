@@ -215,7 +215,7 @@ class Cube {
                 }
 
                 GLuint tex_id = glGetUniformLocation(program_id_, "tex");
-                glUniform1i(tex_id, 0 /*GL_TEXTURE0*/);
+                glUniform1i(tex_id, 0 /*GL_TEXTURE5*/);
 
                 // cleanup
                 glBindTexture(GL_TEXTURE_2D, 0);
@@ -224,7 +224,7 @@ class Cube {
             }
 
             // create the model matrix
-            model_matrix_ = glm::translate(IDENTITY_MATRIX, glm::vec3(0.0f,0.0f,10.0f));
+            model_matrix_ = glm::translate(IDENTITY_MATRIX, glm::vec3(0.0f,0.0f,7.0f));
             model_matrix_ = glm::scale(model_matrix_, glm::vec3(30.0f));
             model_matrix_ = glm::rotate(model_matrix_,3.1415f/2.0f,glm::vec3(1.0f,0.0f,0.0f));
         }
