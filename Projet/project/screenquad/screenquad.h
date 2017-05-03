@@ -1,8 +1,9 @@
 #pragma once
 #include "icg_helper.h"
-#include <time.h> //for time and random seem
-#include <stdlib.h> //for random
-#define DEBUG_SEED 3
+#include <time.h>
+#include <stdlib.h>
+//#define DEBUG_SEED 116
+
 class ScreenQuad {
 
     private:
