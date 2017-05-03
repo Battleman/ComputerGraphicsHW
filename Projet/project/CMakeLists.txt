@@ -6,7 +6,7 @@ file(GLOB_RECURSE HEADERS "*.h")
 file(GLOB TEXTURES
     cube/cube_texture.tga
     cube/skybox_texture.tga
-    quad/quad_texture.tga)
+    quad/quad_texture.tga
     quad/quad_texture.tga
     quad/RockTexture.jpg
     quad/ForestTexture.jpg
