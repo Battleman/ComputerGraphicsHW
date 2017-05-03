@@ -58,10 +58,11 @@ void Init(GLFWwindow* window) {
     //view_matrix_mir = lookAt(cam_pos_mir, cam_look, cam_up);
     view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
     view_matrix_mir = lookAt(vec3(0.0,0.0,-4.0), vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
+
     //view_matrix = lookAt(cam_pos, cam_look, cam_up);
     view_matrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.001f, 10.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.001f, 40.0f);
 
     reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
                         vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
@@ -129,6 +130,7 @@ void Display() {
 
     RecomputeReflectionViewMat();
     //Draw Reflection
+    waterbuffer.Clear();
     waterbuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -143,15 +145,12 @@ void Display() {
     //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 //    quad.Draw(trackball_matrix, view_matrix, projection_matrix);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        vec3 cam_pos(2.0f, 2.0f, 2.0f);
-        vec3 cam_look(0.0f, 0.0f, 0.0f);
-        vec3 cam_up(0.0f, 0.0f, 1.0f);
-        mat4 view = lookAt(cam_pos, cam_look, cam_up);
-        mat4 view_projection = projection_matrix * view;
 
-    sky.Draw(view_projection);
-    quad.Draw(trackball_matrix, view_matrix, projection_matrix,0);
-    water.Draw(trackball_matrix, view_matrix, projection_matrix,0);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    sky.Draw(projection_matrix*view_matrix*trackball_matrix);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    quad.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
+    water.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
 
 }
 

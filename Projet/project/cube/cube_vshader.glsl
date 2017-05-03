@@ -1,6 +1,5 @@
 #version 330 core
 uniform mat4 MVP;
-uniform float time;
 in vec3 vpoint;
 in vec2 vtexcoord;
 out vec2 uv;

@@ -224,9 +224,9 @@ class Cube {
             }
 
             // create the model matrix
-            model_matrix_ = glm::scale(IDENTITY_MATRIX, glm::vec3(1.0f));
-            model_matrix_ = glm::translate(model_matrix_,
-                                           glm::vec3(0.0f, 0.0f, 0.6f));
+            model_matrix_ = glm::translate(IDENTITY_MATRIX, glm::vec3(0.0f,0.0f,10.0f));
+            model_matrix_ = glm::scale(model_matrix_, glm::vec3(30.0f));
+            model_matrix_ = glm::rotate(model_matrix_,3.1415f/2.0f,glm::vec3(1.0f,0.0f,0.0f));
         }
 
         void Cleanup() {
@@ -247,7 +247,7 @@ class Cube {
             glBindTexture(GL_TEXTURE_2D, texture_id_);
 
             // time
-            glUniform1f(glGetUniformLocation(program_id_, "time"), glfwGetTime());
+            //glUniform1f(glGetUniformLocation(program_id_, "time"), glfwGetTime());
 
             // setup MVP
             glm::mat4 MVP = view_projection * model_matrix_;
