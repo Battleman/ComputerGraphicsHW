@@ -14,7 +14,7 @@
 #include "screenquad/screenquad.h"
 #include "trackball.h"
 
-//Cube cube;
+Cube sky;
 Quad quad;
 Quad water;
 
@@ -30,7 +30,8 @@ using namespace glm;
 
 mat4 projection_matrix;
 mat4 view_matrix;
-//mat4 cube_model_matrix;
+mat4 cube_scale;
+mat4 cube_model_matrix;
 mat4 trackball_matrix;
 mat4 old_trackball_matrix;
 mat4 view_matrix_mir;
@@ -74,9 +75,12 @@ void Init(GLFWwindow* window) {
                         vec4( 0.0, 0.0, 0.0, 1.0));
     // create the model matrix (remember OpenGL is right handed)
     // accumulated transformation
-//    cube_model_matrix = scale(IDENTITY_MATRIX, vec3(0.5));
+//    cube_model_matrix = scale(IDENTITY_MATRIX, vec3(50));
 //    cube_model_matrix = translate(cube_model_matrix, vec3(0.0, 0.0, 0.6));
-
+//    cube_scale = mat4(0.25f, 0.0f, 0.0f, 0.0f,
+//                      0.0f, 0.25f, 0.0f, 0.0f
+//                      0.0f, 0.0f, 0.25f, 0.0f,
+//                      0.0f, 0.0f, 0.0f, 1.0f);
     // on retina/hidpi displays, pixels != screen coordinates
     // this unsures that the framebuffer has the same size as the window
     // (see http://www.glfw.org/docs/latest/window.html#window_fbsize)
@@ -86,6 +90,7 @@ void Init(GLFWwindow* window) {
     screenquad.Init(window_width, window_height);
     quad.Init(framebuffer_texture_id, 0.0);
     water.Init(waterbuffer_texture_id, 1.0);
+    sky.Init();
 
 }
 
@@ -135,6 +140,16 @@ void Display() {
 
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+//    quad.Draw(trackball_matrix, view_matrix, projection_matrix);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        vec3 cam_pos(2.0f, 2.0f, 2.0f);
+        vec3 cam_look(0.0f, 0.0f, 0.0f);
+        vec3 cam_up(0.0f, 0.0f, 1.0f);
+        mat4 view = lookAt(cam_pos, cam_look, cam_up);
+        mat4 view_projection = projection_matrix * view;
+
+    sky.Draw(view_projection);
     quad.Draw(trackball_matrix, view_matrix, projection_matrix,0);
     water.Draw(trackball_matrix, view_matrix, projection_matrix,0);
 
@@ -299,7 +314,7 @@ int main(int argc, char *argv[]) {
 
     // cleanup
     quad.Cleanup();
-//    cube.Cleanup();
+    sky.Cleanup();
     framebuffer.Cleanup();
     screenquad.Cleanup();
     water.Cleanup();
