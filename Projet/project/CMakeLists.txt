@@ -17,9 +17,9 @@ copy_files_once(${TEXTURES})
 # list all the files you want to copy everytime
 # you build (ie, you want the shaders there)
 file(GLOB SHADERS
-    noise/*.glsl
     screenquad/*.glsl
-    cube/*.glsl)
+    cube/*.glsl
+    quad/*.glsl)
 deploy_shaders_to_build_dir(${SHADERS})
 
 add_executable(${EXERCISENAME} ${SOURCES} ${HEADERS} ${SHADERS})

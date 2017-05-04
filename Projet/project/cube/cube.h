@@ -7,9 +7,9 @@ static const unsigned int NbCubeVertices = 36;
 static const float cubeSize = 0.5;
 static const glm::vec3 CubeVertices[] =
 {
-    glm::vec3(cubeSize, -cubeSize, -cubeSize),
     glm::vec3(-cubeSize, -cubeSize, -cubeSize),
     glm::vec3(-cubeSize, cubeSize, -cubeSize),
+    glm::vec3(cubeSize, -cubeSize, -cubeSize),
     glm::vec3(-cubeSize, cubeSize, -cubeSize),
     glm::vec3(cubeSize, -cubeSize, -cubeSize),
     glm::vec3(cubeSize, cubeSize, -cubeSize),
@@ -92,7 +92,7 @@ static const glm::vec2 CubeUVs[] =
     glm::vec2(1.0, 0.75)
 };
 
-class Sky {
+class Cube {
 
     private:
         GLuint vertex_array_id_;        // vertex array object
@@ -104,8 +104,8 @@ class Sky {
     public:
         void Init() {
             // compile the shaders.
-            program_id_ = icg_helper::LoadShaders("sky_vshader.glsl",
-                                                  "sky_fshader.glsl");
+            program_id_ = icg_helper::LoadShaders("cube_vshader.glsl",
+                                                  "cube_fshader.glsl");
             if(!program_id_) {
                 exit(EXIT_FAILURE);
             }
@@ -184,15 +184,9 @@ class Sky {
             }
 
             // create the model matrix
-<<<<<<< HEAD:Projet/project/cube/cube.h
             model_matrix_ = glm::translate(IDENTITY_MATRIX, glm::vec3(0.0f,0.0f,7.0f));
             model_matrix_ = glm::scale(model_matrix_, glm::vec3(30.0f));
             model_matrix_ = glm::rotate(model_matrix_,3.1415f/2.0f,glm::vec3(1.0f,0.0f,0.0f));
-=======
-            model_matrix_ = glm::scale(IDENTITY_MATRIX, glm::vec3(1.0f));
-            model_matrix_ = glm::translate(model_matrix_,
-                                           glm::vec3(0.0f, 0.0f, 0.6f));
->>>>>>> master:Projet/project/sky/sky.h
         }
 
         void Cleanup() {
@@ -213,11 +207,9 @@ class Sky {
             glBindTexture(GL_TEXTURE_2D, texture_id_);
 
             // time
-<<<<<<< HEAD:Projet/project/cube/cube.h
+
             //glUniform1f(glGetUniformLocation(program_id_, "time"), glfwGetTime());
-=======
-            glUniform1f(glGetUniformLocation(program_id_, "time"), glfwGetTime());
->>>>>>> master:Projet/project/sky/sky.h
+
 
             // setup MVP
             glm::mat4 MVP = view_projection * model_matrix_;
