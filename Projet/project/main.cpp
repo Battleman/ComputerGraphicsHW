@@ -9,13 +9,13 @@
 #include "framebuffer.h"
 #include "waterbuffer.h"
 
-//#include "cube/cube.h"
-#include "noise/noise.h"
+#include "cube/cube.h"
 #include "screenquad/screenquad.h"
 #include "trackball.h"
-#include "sky/sky.h"
+#include "quad/quad.h"
 
-Sky sky;
+Cube cube;
+
 Quad quad;
 Quad water;
 
@@ -59,10 +59,11 @@ void Init(GLFWwindow* window) {
     //view_matrix_mir = lookAt(cam_pos_mir, cam_look, cam_up);
     view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
     view_matrix_mir = lookAt(vec3(0.0,0.0,-4.0), vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
+
     //view_matrix = lookAt(cam_pos, cam_look, cam_up);
     view_matrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.001f, 10.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.001f, 40.0f);
 
     reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
                         vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
@@ -88,10 +89,12 @@ void Init(GLFWwindow* window) {
     glfwGetFramebufferSize(window, &window_width, &window_height);
     GLuint framebuffer_texture_id = framebuffer.Init(window_width, window_height, true);
     GLuint waterbuffer_texture_id = waterbuffer.Init(window_width, window_height, true);
-//    screenquad.Init(window_width, window_height);
-//    quad.Init(framebuffer_texture_id, 0.0);
-//    water.Init(waterbuffer_texture_id, 1.0);
-    sky.Init();
+
+    screenquad.Init(window_width, window_height);
+    quad.Init(framebuffer_texture_id, 0.0);
+    water.Init(waterbuffer_texture_id, 1.0);
+    cube.Init();
+
 
 }
 
@@ -134,29 +137,28 @@ void Display() {
     framebuffer.Unbind();
 
     RecomputeReflectionViewMat();
+
     //Draw Reflection
+    //waterbuffer.Clear();
     waterbuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         quad.Draw(trackball_matrix*reflect_mat,view_matrix, projection_matrix,1);
+        cube.Draw(projection_matrix * view_matrix * trackball_matrix * reflect_mat);
     }
     waterbuffer.Unbind();
 
     //Draw terrain and water plane
-
-//    framebuffer.Bind();
-//    {
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        sky.Draw(view_projection);
-//    }
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-//    quad.Draw(trackball_matrix, view_matrix, projection_matrix);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    quad.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
+    cube.Draw(projection_matrix * view_matrix * trackball_matrix);
+    water.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
 
-
-    sky.Draw(view_projection);
+    //cube.Draw(view_projection);
 //    quad.Draw(trackball_matrix, view_matrix, projection_matrix,0);
 //    water.Draw(trackball_matrix, view_matrix, projection_matrix,0);
 }
@@ -170,7 +172,7 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     window_height = height;
 
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.001f, 10.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.001f, 40.0f);
 
     glViewport(0, 0, window_width, window_height);
 
@@ -320,7 +322,7 @@ int main(int argc, char *argv[]) {
 
     // cleanup
     quad.Cleanup();
-    sky.Cleanup();
+    cube.Cleanup();
     framebuffer.Cleanup();
     screenquad.Cleanup();
     water.Cleanup();
