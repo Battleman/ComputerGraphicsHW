@@ -9,12 +9,14 @@
 #include "framebuffer.h"
 #include "waterbuffer.h"
 
-#include "cube/cube.h"
-#include "quad/quad.h"
+//#include "cube/cube.h"
+#include "noise/noise.h"
 #include "screenquad/screenquad.h"
 #include "trackball.h"
+#include "sky/sky.h"
 
 Cube sky;
+
 Quad quad;
 Quad water;
 
@@ -88,10 +90,11 @@ void Init(GLFWwindow* window) {
     glfwGetFramebufferSize(window, &window_width, &window_height);
     GLuint framebuffer_texture_id = framebuffer.Init(window_width, window_height, true);
     GLuint waterbuffer_texture_id = waterbuffer.Init(window_width, window_height, true);
+
     screenquad.Init(window_width, window_height);
     quad.Init(framebuffer_texture_id, 0.0);
     water.Init(waterbuffer_texture_id, 1.0);
-    sky.Init();
+
 
 }
 
@@ -117,6 +120,11 @@ void RecomputeReflectionViewMat() {
 }
 
 void Display() {
+    vec3 cam_pos(2.0f, 2.0f, 2.0f);
+    vec3 cam_look(0.0f, 0.0f, 0.0f);
+    vec3 cam_up(0.0f, 0.0f, 1.0f);
+    mat4 view = lookAt(cam_pos, cam_look, cam_up);
+    mat4 view_projection = projection_matrix * view;
     // render to framebuffer
 
     //Perlin Noise
@@ -150,6 +158,9 @@ void Display() {
     sky.Draw(projection_matrix * view_matrix * trackball_matrix);
     water.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
 
+    sky.Draw(view_projection);
+//    quad.Draw(trackball_matrix, view_matrix, projection_matrix,0);
+//    water.Draw(trackball_matrix, view_matrix, projection_matrix,0);
 }
 
 
@@ -171,8 +182,8 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     framebuffer.Init(window_width, window_height);
     screenquad.UpdateSize(window_width, window_height);
 
-    waterbuffer.Cleanup();
-    waterbuffer.Init(window_width, window_height);
+//    waterbuffer.Cleanup();
+//    waterbuffer.Init(window_width, window_height);
 }
 
 void ErrorCallback(int error, const char* description) {

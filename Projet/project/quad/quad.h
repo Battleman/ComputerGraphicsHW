@@ -42,7 +42,7 @@ class Quad {
 
             // 0: False, 1: True
             is_water_ = is_water;
-            std::cout << is_water_ << std::endl;
+//            std::cout << is_water_ << std::endl;
             glUniform1f(glGetUniformLocation(program_id_, "isWater"), is_water_);
 
             //material?
