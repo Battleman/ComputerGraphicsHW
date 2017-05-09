@@ -6,6 +6,7 @@ out vec3 light_dir, view_dir;
 out vec4 vpoint_mv;
 out vec3 material;
 out float height;
+out vec3 water;
 //out vec3 normal_mv;
 
 uniform float isWater;
@@ -13,11 +14,15 @@ uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
 uniform sampler2D tex;
+uniform sampler2D tex1;
 uniform sampler2D tex2;
 uniform sampler2D tex3;
 uniform sampler2D tex4;
 uniform vec3 light_pos;
 uniform int triangles_number;
+
+uniform float time;
+
 
 void main() {
     mat4 MV = view * model;
@@ -43,10 +48,14 @@ void main() {
         normal_mv = normalize(cross(X,Y));
         */
     } else {
-        vpoint_mv = MV * vec4(position.x,position.y,-0.0, 1.0);
+        float height = 0.01*sin((position.x+position.y-time)*6.0f);
+
+        vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
         gl_Position = projection * vpoint_mv;
         light_dir = normalize(light_pos-vec3(vpoint_mv));
         view_dir = normalize(-vec3(vpoint_mv));
+
+        water = texture(tex1, uv).rgb;
     }
 
     //Next I'll be using a gaussian function to make the color changes smoother

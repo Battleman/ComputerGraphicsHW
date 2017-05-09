@@ -11,6 +11,7 @@ class Quad {
         GLuint vertex_buffer_object_position_;  // memory buffer for positions
         GLuint vertex_buffer_object_index_;     // memory buffer for indices
         GLuint texture_id_;             // texture ID
+        GLuint texture_map_;            //normalMap for water
         float is_water_;
         GLuint image_texture_id_[3];    // image texture ID
         GLuint num_indices_;            // number of vertices to render
@@ -30,7 +31,7 @@ class Quad {
             glm::vec3 La = glm::vec3(1.0f, 1.0f, 1.0f);
             glm::vec3 Ld = glm::vec3(1.0f, 1.0f, 1.0f);
             glm::vec3 Ls = glm::vec3(1.0f, 1.0f, 1.0f);
-            glm::vec3 light_pos = glm::vec3(0.0f, 0.0f, 4.0f);
+            glm::vec3 light_pos = glm::vec3(5.0f, 5.0f, 2.0f);
             GLuint light_pos_id = glGetUniformLocation(program_id_, "light_pos");
             GLuint La_id = glGetUniformLocation(program_id_, "La");
             GLuint Ld_id = glGetUniformLocation(program_id_, "Ld");
@@ -154,6 +155,7 @@ class Quad {
                                       ZERO_STRIDE, ZERO_BUFFER_OFFSET);
             }
 
+
             // load/Assign first texture
             this->texture_id_ = texture;
             glBindTexture(GL_TEXTURE_2D, texture_id_);
@@ -202,10 +204,41 @@ class Quad {
                 stbi_image_free(image);
             }
 
-            for(int i = 1; i<5; i++) {
-                glActiveTexture(GL_TEXTURE0 + i);
-                glBindTexture(GL_TEXTURE_2D, image_texture_id_[i-1]);
+            {
+                int width;
+                int height;
+                int nb_component;
+                string filename = "normalMap.png";
+                // set stb_image to have the same coordinates as OpenGL
+                stbi_set_flip_vertically_on_load(1);
+                unsigned char* image = stbi_load(filename.c_str(), &width,
+                                                 &height, &nb_component, 0);
+
+                if(image == nullptr) {
+                    throw(string("Failed to load texture"));
+                }
+
+                glGenTextures(1, &texture_map_);
+                glBindTexture(GL_TEXTURE_2D, texture_map_);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+                if(nb_component == 3) {
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+                                 GL_RGB, GL_UNSIGNED_BYTE, image);
+                } else if(nb_component == 4) {
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                                 GL_RGBA, GL_UNSIGNED_BYTE, image);
+                }
+
+                GLuint tex_id = glGetUniformLocation(program_id_, "tex1");
+                glUniform1i(tex_id, 5 /*GL_TEXTURE5*/);
+
+                // cleanup
+                glBindTexture(GL_TEXTURE_2D, 0);
+                stbi_image_free(image);
             }
+
 
             // to avoid the current object being polluted
             glBindVertexArray(0);
@@ -221,6 +254,7 @@ class Quad {
             glDeleteProgram(program_id_);
             glDeleteVertexArrays(1, &vertex_array_id_);
             glDeleteTextures(1, &texture_id_);
+            glDeleteTextures(1, &texture_map_);
         }
 
         void Draw(const glm::mat4 &model,
@@ -233,10 +267,19 @@ class Quad {
             // bind textures
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture_id_);
+            glActiveTexture(GL_TEXTURE0+5);
+            glBindTexture(GL_TEXTURE_2D, texture_map_);
+            for(int i = 1; i<4; i++) {
+                glActiveTexture(GL_TEXTURE0 + i);
+                glBindTexture(GL_TEXTURE_2D, image_texture_id_[i-1]);
+            }
 
             // 0: False, 1: True
             GLuint discard_loc = glGetUniformLocation(program_id_,"discard_pix");
             glUniform1i(discard_loc,discard);
+
+            const float time = glfwGetTime();
+            glUniform1f(glGetUniformLocation(program_id_, "time"), time);
 
             // setup MVP
             glm::mat4 MVP = projection*view*model;
