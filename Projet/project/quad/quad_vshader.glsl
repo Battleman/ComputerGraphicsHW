@@ -7,6 +7,7 @@ out vec4 vpoint_mv;
 out vec3 material;
 out float height;
 out vec3 water;
+out vec2 dudv;
 //out vec3 normal_mv;
 
 uniform float isWater;
@@ -18,11 +19,14 @@ uniform sampler2D tex1;
 uniform sampler2D tex2;
 uniform sampler2D tex3;
 uniform sampler2D tex4;
+uniform sampler2D tex5;
 uniform vec3 light_pos;
 uniform int triangles_number;
 
 uniform float time;
+uniform float speed;
 
+const float wave_strength = 0.007;
 
 void main() {
     mat4 MV = view * model;
@@ -48,14 +52,17 @@ void main() {
         normal_mv = normalize(cross(X,Y));
         */
     } else {
-        float height = 0.01*sin((position.x+position.y-time)*6.0f);
+        float height = 0.001*sin((position.x+position.y-time)*6.0f);
 
         vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
         gl_Position = projection * vpoint_mv;
         light_dir = normalize(light_pos-vec3(vpoint_mv));
         view_dir = normalize(-vec3(vpoint_mv));
 
-        water = texture(tex1, uv).rgb;
+        water = texture(tex1, vec2(uv.x + speed, uv.y)).rgb;
+//        water = vec3(water.x, water.z, water.y);
+        dudv = (texture(tex5, vec2(uv.x + speed, uv.y)).rg * 2.0 - 1.0) * wave_strength;
+        dudv += (texture(tex5, vec2(- uv.x - speed, uv.y + speed)).rg * 2.0 - 1.0) * wave_strength;
     }
 
     //Next I'll be using a gaussian function to make the color changes smoother

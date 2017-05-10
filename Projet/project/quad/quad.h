@@ -12,9 +12,11 @@ class Quad {
         GLuint vertex_buffer_object_index_;     // memory buffer for indices
         GLuint texture_id_;             // texture ID
         GLuint texture_map_;            //normalMap for water
+        GLuint texture_dudv_;            //dudvMap for water
         float is_water_;
         GLuint image_texture_id_[3];    // image texture ID
         GLuint num_indices_;            // number of vertices to render
+        float move_factor = 0.03;
 
     public:
 
@@ -239,6 +241,41 @@ class Quad {
                 stbi_image_free(image);
             }
 
+            {
+                int width;
+                int height;
+                int nb_component;
+                string filename = "waterDUDV.png";
+                // set stb_image to have the same coordinates as OpenGL
+                stbi_set_flip_vertically_on_load(1);
+                unsigned char* image = stbi_load(filename.c_str(), &width,
+                                                 &height, &nb_component, 0);
+
+                if(image == nullptr) {
+                    throw(string("Failed to load texture"));
+                }
+
+                glGenTextures(1, &texture_dudv_);
+                glBindTexture(GL_TEXTURE_2D, texture_dudv_);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+                if(nb_component == 3) {
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+                                 GL_RGB, GL_UNSIGNED_BYTE, image);
+                } else if(nb_component == 4) {
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                                 GL_RGBA, GL_UNSIGNED_BYTE, image);
+                }
+
+                GLuint tex_id = glGetUniformLocation(program_id_, "tex5");
+                glUniform1i(tex_id, 6 /*GL_TEXTURE6*/);
+
+                // cleanup
+                glBindTexture(GL_TEXTURE_2D, 0);
+                stbi_image_free(image);
+            }
+
 
             // to avoid the current object being polluted
             glBindVertexArray(0);
@@ -255,6 +292,7 @@ class Quad {
             glDeleteVertexArrays(1, &vertex_array_id_);
             glDeleteTextures(1, &texture_id_);
             glDeleteTextures(1, &texture_map_);
+            glDeleteTextures(1, &texture_dudv_);
         }
 
         void Draw(const glm::mat4 &model,
@@ -273,6 +311,8 @@ class Quad {
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D, image_texture_id_[i-1]);
             }
+            glActiveTexture(GL_TEXTURE0+6);
+            glBindTexture(GL_TEXTURE_2D, texture_dudv_);
 
             // 0: False, 1: True
             GLuint discard_loc = glGetUniformLocation(program_id_,"discard_pix");
@@ -280,6 +320,8 @@ class Quad {
 
             const float time = glfwGetTime();
             glUniform1f(glGetUniformLocation(program_id_, "time"), time);
+            float speed = time * move_factor;
+            glUniform1f(glGetUniformLocation(program_id_, "speed"), speed);
 
             // setup MVP
             glm::mat4 MVP = projection*view*model;
