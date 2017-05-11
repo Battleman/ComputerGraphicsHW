@@ -43,10 +43,15 @@ double water_height = 0.0;
 vec4 r_plane(0.0,0.0,1.0,0.0); //TODO paramétrer la hauteur de l'eau
 vec4 initial_rplane(0.0,0.0,1.0,0);
 vec3 translate_vector_mir(0.0f, 0.0f, 4.0f);
-vec3 cam_pos(2.0f, 2.0f, 2.0f);
+vec3 cam_pos(0.0f, 0.0f, 10.0f);
 vec3 cam_pos_mir(2.0f, 2.0f, -2.9f);
 vec3 cam_look(0.0f, 0.0f, 0.0f);
-vec3 cam_up(0.0f, 0.0f, 1.0f);
+vec3 cam_up(0.0f, 1.0f, 0.0f);
+bool cam_forward = false;
+bool cam_backward = false;
+bool cam_left = false;
+bool cam_right = false;
+vec2 mouse_anchor(0.0f);
 
 double zoom;
 float filter = 2.0f;
@@ -57,13 +62,13 @@ void Init(GLFWwindow* window) {
 
     // setup view and projection matrices
     //view_matrix_mir = lookAt(cam_pos_mir, cam_look, cam_up);
-    view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
-    view_matrix_mir = lookAt(vec3(0.0,0.0,-4.0), vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
+    //view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
+    //view_matrix_mir = lookAt(vec3(0.0,0.0,-4.0), vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
 
-    //view_matrix = lookAt(cam_pos, cam_look, cam_up);
-    view_matrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
+    view_matrix = lookAt(cam_pos, cam_look, cam_up);
+    //view_matrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.001f, 40.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.001f, 80.0f);
 
     reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
                         vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
@@ -119,14 +124,34 @@ void RecomputeReflectionViewMat() {
     //reflect_mat[0][0] = - reflect_mat[0][0];
 }
 
-void Display() {
-    vec3 cam_pos(2.0f, 2.0f, 2.0f);
-    vec3 cam_look(0.0f, 0.0f, 0.0f);
-    vec3 cam_up(0.0f, 0.0f, 1.0f);
-    mat4 view = lookAt(cam_pos, cam_look, cam_up);
-    mat4 view_projection = projection_matrix * view;
-    // render to framebuffer
+void UpdateCamera() {
+    vec3 translate_vector;
+    if(cam_forward) {
+        translate_vector = normalize(cam_look-cam_pos)/3.0f;
+        cam_look = cam_look+translate_vector;
+        cam_pos = cam_pos+translate_vector;
+    }
+    if(cam_backward) {
+        translate_vector = normalize(cam_look-cam_pos)/3.0f;
+        cam_look = cam_look-translate_vector;
+        cam_pos = cam_pos-translate_vector;
+    }
+    if(cam_left) {
+        translate_vector = normalize(cross(cam_look-cam_pos,cam_up))/3.0f;
+        cam_look = cam_look-translate_vector;
+        cam_pos = cam_pos-translate_vector;
+    }
+    if(cam_right) {
+        translate_vector = normalize(cross(cam_look-cam_pos,cam_up))/3.0f;
+        cam_look = cam_look+translate_vector;
+        cam_pos = cam_pos+translate_vector;
+    }
+    view_matrix = lookAt(cam_pos, cam_look, cam_up);
+}
 
+void Display() {
+    // render to framebuffer
+    UpdateCamera();
     //Perlin Noise
     framebuffer.Clear();
     framebuffer.Bind();
@@ -139,7 +164,7 @@ void Display() {
     RecomputeReflectionViewMat();
 
     //Draw Reflection
-    //waterbuffer.Clear();
+    waterbuffer.Clear();
     waterbuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -152,11 +177,10 @@ void Display() {
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     quad.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
     cube.Draw(projection_matrix * view_matrix * trackball_matrix);
     water.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     //cube.Draw(view_projection);
 //    quad.Draw(trackball_matrix, view_matrix, projection_matrix,0);
@@ -194,12 +218,35 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
-    if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-       filter -= 0.25;
+    if (key == GLFW_KEY_W) {
+        if(action == GLFW_PRESS) {
+            cam_forward = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_forward = false;
+        }
     }
-    if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-        filter += 0.25f;
+    if (key == GLFW_KEY_S) {
+        if(action == GLFW_PRESS) {
+            cam_backward = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_backward = false;
+        }
     }
+    if (key == GLFW_KEY_A) {
+        if(action == GLFW_PRESS) {
+            cam_left = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_left = false;
+        }
+    }
+    if (key == GLFW_KEY_D) {
+        if(action == GLFW_PRESS) {
+            cam_right = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_right = false;
+        }
+    }
+
 }
 
 // transforms glfw screen coordinates into normalized OpenGL coordinates.
@@ -222,10 +269,15 @@ void MouseButton(GLFWwindow* window, int button, int action, int mod) {
         old_trackball_matrix = trackball_matrix;
         // Store the current state of the model matrix.
     }
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
+//    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
+//        double x_i, y_i;
+//        glfwGetCursorPos(window, &x_i, &y_i);
+//        zoom = TransformScreenCoords(window, x_i, y_i)[1];
+//    }
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         double x_i, y_i;
         glfwGetCursorPos(window, &x_i, &y_i);
-        zoom = TransformScreenCoords(window, x_i, y_i)[1];
+        mouse_anchor = TransformScreenCoords(window, x_i, y_i);
     }
 }
 
@@ -239,24 +291,41 @@ void MousePos(GLFWwindow* window, double x, double y) {
     }
 
     // zoom
+//    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+//        // TODO 4: Implement zooming. When the right mouse button is pressed,
+//        // moving the mouse cursor up and down (along the screen's y axis)
+//        // should zoom out and it. For that you have to update the current
+//        // 'view_matrix' with a translation along the z axis.
+//        // view_matrix = ...
+//        const float constant_factor = 4.0f;
+//        vec2 p = TransformScreenCoords(window, x, y);
+//        vec3 translate_vector = vec3(0.0,0.0,view_matrix[3][2]+((p[1]-zoom)*constant_factor));
+//        //view_matrix = translate(mat4(1.0f),translate_vector);
+
+//        //view_matrix = view_matrix* (float)(1+(translate_vector.length()/4.0));
+
+//        translate_vector_mir = vec3(0.0,0.0,view_matrix_mir[3][2]+((p[1]-zoom)*constant_factor));
+//        view_matrix_mir = translate(mat4(1.0f),translate_vector_mir);
+//        //view_matrix_mir = reflect_mat*view_matrix_mir;
+//        zoom = p[1];
+//        //I'd find it more intuitive to zoom out and in by scaling the object, why don't we do that?
+
+//    }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-        // TODO 4: Implement zooming. When the right mouse button is pressed,
-        // moving the mouse cursor up and down (along the screen's y axis)
-        // should zoom out and it. For that you have to update the current
-        // 'view_matrix' with a translation along the z axis.
-        // view_matrix = ...
-        const float constant_factor = 4.0f;
-        vec2 p = TransformScreenCoords(window, x, y);
-        vec3 translate_vector = vec3(0.0,0.0,view_matrix[3][2]+((p[1]-zoom)*constant_factor));
-        view_matrix = translate(mat4(1.0f),translate_vector);
 
-        //view_matrix = view_matrix* (float)(1+(translate_vector.length()/4.0));
+        //std::cout << mouse_anchor.y << std::endl;
 
-        translate_vector_mir = vec3(0.0,0.0,view_matrix_mir[3][2]+((p[1]-zoom)*constant_factor));
-        view_matrix_mir = translate(mat4(1.0f),translate_vector_mir);
-        //view_matrix_mir = reflect_mat*view_matrix_mir;
-        zoom = p[1];
-        //I'd find it more intuitive to zoom out and in by scaling the object, why don't we do that?
+            vec2 mouse_dif = mouse_anchor - TransformScreenCoords(window, x, y);
+            if(length(mouse_dif) > 0.0) {
+                mouse_anchor = TransformScreenCoords(window, x, y);
+                vec3 look_direction = cam_look-cam_pos;
+                vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(cam_look-cam_pos,cam_up))*mouse_dif.x,look_direction);
+                mat4 rotation = rotate(mat4(1.0f),0.03f,rotation_axis);
+                vec3 new_cam_look = glm::vec3(rotation * glm::vec4(cam_look-cam_pos, 0.0));
+                vec3 new_cam_up = glm::vec3(rotation * glm::vec4(cam_up, 0.0));
+                cam_look = cam_pos+(normalize(new_cam_look)*2.0f);
+                cam_up = normalize(new_cam_up);
+            }
 
     }
 }

@@ -21,12 +21,12 @@ uniform int triangles_number;
 
 void main() {
     mat4 MV = view * model;
-    vec2 uv = (position + vec2(1.0, 1.0)) * 0.5;
+    vec2 uv = (position + vec2(10.0, 10.0)) * 0.05;
 
     if(isWater == 0) {
-        height = texture(tex,uv).r+0.5;
+        height = texture(tex,uv).r;
 
-        vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
+        vpoint_mv = MV * vec4(position.x,position.y,height*10, 1.0);
         gl_Position = projection * vpoint_mv;
         light_dir = normalize(light_pos-vec3(vpoint_mv));
         view_dir = normalize(-vec3(vpoint_mv));
