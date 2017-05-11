@@ -179,7 +179,7 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     // when the window is resized, the framebuffer and the screenquad
     // should also be resized
     framebuffer.Cleanup();
-    framebuffer.Init(window_width, window_height);
+    framebuffer.Init(window_width, window_height, true);
     screenquad.UpdateSize(window_width, window_height);
 
 //    waterbuffer.Cleanup();

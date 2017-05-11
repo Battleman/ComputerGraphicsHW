@@ -31,6 +31,7 @@ const float wave_strength = 0.007;
 void main() {
     mat4 MV = view * model;
     vec2 uv = (position + vec2(1.0, 1.0)) * 0.5;
+    vec3 normal_mv = vec3(0.0);
 
     if(isWater == 0) {
         height = texture(tex,uv).r+0.5;
@@ -40,7 +41,7 @@ void main() {
         light_dir = normalize(light_pos-vec3(vpoint_mv));
         view_dir = normalize(-vec3(vpoint_mv));
 
-        /* I'm keeping this piece of code in case I'd need to compute normals in the vertex shader
+//         I'm keeping this piece of code in case I'd need to compute normals in the vertex shader
         float offset = 1.0f/float(triangles_number*1.0);
         vec4 X0point_mv = MV * vec4(position.x-offset,position.y,texture(tex,vec2(((position.x-offset)/2.0)+0.5,uv.y)).r, 1.0);
         vec4 Y0point_mv = MV * vec4(position.x,position.y-offset,texture(tex,vec2(uv.x,((position.y-offset)/2.0)+0.5)).r, 1.0);
@@ -49,8 +50,8 @@ void main() {
 
         vec3 X = X1point_mv.xyz - X0point_mv.xyz;
         vec3 Y = Y1point_mv.xyz - Y0point_mv.xyz;
-        normal_mv = normalize(cross(X,Y));
-        */
+        normal_mv += normalize(cross(X,Y));
+
     } else {
         float height = 0.001*sin((position.x+position.y-time)*6.0f);
 
@@ -96,6 +97,12 @@ void main() {
     if(height > 0.90) {
         height_material = vec3(1.2,1.2,1.2); // snow
     }
+    if(height < 0.90 && height > 0.25 && (normal_mv.x < 0.25 || normal_mv.y < 0.25)) {
+        height_material = mix(height_material, texture(tex2,uv).rgb, 0.3);
+    }
+//    if(height > 0 && height < 0.45 && (normal_mv.z > 0.8 || normal_mv.x < 0.2 || normal_mv.y < 0.2)) {
+//        height_material = mix(height_material, texture(tex3,uv).rgb, 0.5);
+//    }
 
     material = height_material;
 
