@@ -27,6 +27,7 @@ uniform float time;
 uniform float speed;
 
 const float wave_strength = 0.007;
+const float tiling = 4.0;
 
 void main() {
     mat4 MV = view * model;
@@ -36,7 +37,7 @@ void main() {
     if(isWater == 0) {
         height = texture(tex,uv).r+0.5;
 
-        vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
+        vpoint_mv = MV * vec4(position.x,position.y,height/4.0, 1.0);
         gl_Position = projection * vpoint_mv;
         light_dir = normalize(light_pos-vec3(vpoint_mv));
         view_dir = normalize(-vec3(vpoint_mv));
@@ -60,10 +61,10 @@ void main() {
         light_dir = normalize(light_pos-vec3(vpoint_mv));
         view_dir = normalize(-vec3(vpoint_mv));
 
-        water = texture(tex1, vec2(uv.x + speed, uv.y)).rgb;
+        water = texture(tex1, vec2(uv.x + speed, uv.y)*tiling).rgb;
 //        water = vec3(water.x, water.z, water.y);
-        dudv = (texture(tex5, vec2(uv.x + speed, uv.y)).rg * 2.0 - 1.0) * wave_strength;
-        dudv += (texture(tex5, vec2(- uv.x - speed, uv.y + speed)).rg * 2.0 - 1.0) * wave_strength;
+        dudv = (texture(tex5, vec2(uv.x + speed, uv.y)*tiling).rg * 2.0 - 1.0) * wave_strength;
+        dudv += (texture(tex5, vec2(- uv.x - speed, uv.y + speed)*tiling).rg * 2.0 - 1.0) * wave_strength;
     }
 
     //Next I'll be using a gaussian function to make the color changes smoother
@@ -82,7 +83,7 @@ void main() {
     //grass/trees: green, at height 0.35, spread: -0.25 to -0.05
     variance = 0.1;
     color_height = 0.35;
-    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * texture(tex3,uv).rgb;
+    height_material += exp((-pow((height-color_height),2))/(2*variance*variance)) * texture(tex3,uv*10).rgb;
     //mountain: grey, at height 0.65, spread: -0.05 to 0.35
     variance = 0.20;
     color_height = 0.65;

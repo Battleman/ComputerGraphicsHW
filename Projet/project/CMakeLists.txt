@@ -9,8 +9,12 @@ file(GLOB TEXTURES
     quad/quad_texture.tga
     quad/quad_texture.tga
     cube/sky.jpg
-    cube/skybox_clouds_whole.png
-    cube/skybox_texture.tga
+    cube/right.jpg
+    cube/top.jpg
+    cube/bottom.jpg
+    cube/back.jpg
+    cube/front.jpg
+    cube/left.jpg
     quad/RockTexture.jpg
     quad/SandTexture.jpg
     quad/ForestTexture.jpg
@@ -23,7 +27,8 @@ copy_files_once(${TEXTURES})
 file(GLOB SHADERS
     screenquad/*.glsl
     cube/*.glsl
-    quad/*.glsl)
+    quad/*.glsl
+    water/*.glsl)
 deploy_shaders_to_build_dir(${SHADERS})
 
 add_executable(${EXERCISENAME} ${SOURCES} ${HEADERS} ${SHADERS})

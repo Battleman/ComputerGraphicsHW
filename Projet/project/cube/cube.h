@@ -147,45 +147,45 @@ class Cube {
                                       DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
             }
 
-            // load texture$
+            // load texture
             {
-                int width;
-                int height;
-                int nb_component;
-                string texture_filename = "sky.jpg";
-                stbi_set_flip_vertically_on_load(1);
-                unsigned char* image = stbi_load(texture_filename.c_str(),
-                                                 &width, &height, &nb_component, 0);
+                            int width;
+                            int height;
+                            int nb_component;
+                            string texture_filename = "sky.jpg";
+                            stbi_set_flip_vertically_on_load(1);
+                            unsigned char* image = stbi_load(texture_filename.c_str(),
+                                                             &width, &height, &nb_component, 0);
 
-                if(image == nullptr) {
-                    throw(std::string("Failed to load texture"));
-                }
+                            if(image == nullptr) {
+                                throw(std::string("Failed to load texture"));
+                            }
 
-                glGenTextures(1, &texture_id_);
-                glBindTexture(GL_TEXTURE_2D, texture_id_);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                            glGenTextures(1, &texture_id_);
+                            glBindTexture(GL_TEXTURE_2D, texture_id_);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-                if(nb_component == 3) {
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
-                                 GL_RGB, GL_UNSIGNED_BYTE, image);
-                } else if(nb_component == 4) {
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                                 GL_RGBA, GL_UNSIGNED_BYTE, image);
-                }
+                            if(nb_component == 3) {
+                                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+                                             GL_RGB, GL_UNSIGNED_BYTE, image);
+                            } else if(nb_component == 4) {
+                                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                                             GL_RGBA, GL_UNSIGNED_BYTE, image);
+                            }
 
-                GLuint tex_id = glGetUniformLocation(program_id_, "tex");
-                glUniform1i(tex_id, 0 /*GL_TEXTURE5*/);
+                            GLuint tex_id = glGetUniformLocation(program_id_, "tex");
+                            glUniform1i(tex_id, 0 /*GL_TEXTURE5*/);
 
-                // cleanup
-                glBindTexture(GL_TEXTURE_2D, 0);
-                stbi_image_free(image);
+                            // cleanup
+                            glBindTexture(GL_TEXTURE_2D, 0);
+                            stbi_image_free(image);
 
-            }
+                        }
 
             // create the model matrix
             model_matrix_ = glm::translate(IDENTITY_MATRIX, glm::vec3(0.0f,0.0f,7.0f));
