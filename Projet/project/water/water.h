@@ -2,7 +2,7 @@
 #include "icg_helper.h"
 #include "glm/gtc/type_ptr.hpp"
 
-class Quad {
+class Water {
 
     private:
         GLuint vertex_array_id_;        // vertex array object
@@ -13,17 +13,15 @@ class Quad {
         GLuint texture_id_;             // texture ID
         GLuint texture_map_;            //normalMap for water
         GLuint texture_dudv_;            //dudvMap for water
-        float is_water_;
-        GLuint image_texture_id_[3];    // image texture ID
         GLuint num_indices_;            // number of vertices to render
         float move_factor = 0.03;
 
     public:
 
-        void Init(GLuint texture, float is_water) {
+        void Init(GLuint texture) {
             // compile the shaders
-            program_id_ = icg_helper::LoadShaders("quad_vshader.glsl",
-                                                  "quad_fshader.glsl");
+            program_id_ = icg_helper::LoadShaders("water_vshader.glsl",
+                                                  "water_fshader.glsl");
             if(!program_id_) {
                 exit(EXIT_FAILURE);
             }
@@ -43,23 +41,9 @@ class Quad {
             glUniform3fv(Ld_id, ONE, glm::value_ptr(Ld));
             glUniform3fv(Ls_id, ONE, glm::value_ptr(Ls));
 
-            // 0: False, 1: True
-            is_water_ = is_water;
-//            std::cout << is_water_ << std::endl;
-            glUniform1f(glGetUniformLocation(program_id_, "isWater"), is_water_);
-
-            //material?
-            glm::vec3 ka = glm::vec3(1.0f, 1.0f, 1.0f);
-            glm::vec3 kd = glm::vec3(0.6f, 0.95f, 1.0f);
-            glm::vec3 ks = glm::vec3(1.0f, 1.0f, 1.0f);
+            // alpha for shading
             float alpha = 60.0f;
-            GLuint ka_id = glGetUniformLocation(program_id_, "ka");
-            GLuint kd_id = glGetUniformLocation(program_id_, "kd");
-            GLuint ks_id = glGetUniformLocation(program_id_, "ks");
             GLuint alpha_id = glGetUniformLocation(program_id_, "alpha");
-            glUniform3fv(ka_id, ONE, glm::value_ptr(ka));
-            glUniform3fv(kd_id, ONE, glm::value_ptr(kd));
-            glUniform3fv(ks_id, ONE, glm::value_ptr(ks));
             glUniform1f(alpha_id, alpha);
 
 
@@ -74,7 +58,6 @@ class Quad {
                 std::vector<GLuint> indices;
 
                 int grid_dim = 512;
-                float grid_size = 20.0f;
 
                 GLuint grim_dim_id = glGetUniformLocation(program_id_, "triangles_number");
                 glUniform1i(grim_dim_id, grid_dim);
@@ -89,8 +72,6 @@ class Quad {
                 //half the size because the grid must be a square, so their vertices
                 //are outside the second loop.
 
-
-                /*
                 int index = 0;
                 vertices.push_back(-1.0f);
                 vertices.push_back(-1.0f);
@@ -136,32 +117,7 @@ class Quad {
                     }
 
                 }
-                */
 
-                float grid_start = -grid_size/2.0;
-                for(int i = 0; i < grid_dim; i++) {
-                    for(int j = 0; j < grid_dim; j++) {
-                        vertices.push_back(grid_start+(grid_size/(float)grid_dim)*j);
-                        vertices.push_back(grid_start+(grid_size/(float)grid_dim)*i);
-                    }
-                }
-                for(int i = 0; i < grid_dim-1; i++) {
-                    if(i%2 == 0) { //forward loop
-                        for(int j = 0; j < grid_dim-1; j++) {
-                            indices.push_back(grid_dim*i+j);
-                            indices.push_back(grid_dim*(1+i)+j);
-                            indices.push_back(grid_dim*i+j+1);
-                            indices.push_back(grid_dim*(1+i)+1+j);
-                        }
-                    } else { //backward loop
-                        for(int j = grid_dim-2; j >= 0; j--) {
-                            indices.push_back(grid_dim*(1+i)+1+j);
-                            indices.push_back(grid_dim*i+j+1);
-                            indices.push_back(grid_dim*(1+i)+j);
-                            indices.push_back(grid_dim*i+j);
-                        }
-                    }
-                }
 
 
                 num_indices_ = indices.size();
@@ -192,48 +148,6 @@ class Quad {
             GLuint tex_id = glGetUniformLocation(program_id_, "tex");
             glUniform1i(tex_id, 0 /*GL_TEXTURE0*/);
 
-            string texture_filename[3];
-            texture_filename[0] = "RockTexture.jpg";
-            texture_filename[1] = "ForestTexture.jpg";
-            //texture_filename[1] = "SandTexture.jpg";
-            texture_filename[2] = "SandTexture.jpg";
-
-
-            GLchar* texture_uniform[3];
-            texture_uniform[0] = "tex2";
-            texture_uniform[1] = "tex3";
-            texture_uniform[2] = "tex4";
-
-            GLuint texture_ids[3];
-
-            // load image texture
-            for(int i = 1; i<4; i++) {
-                int width;
-                int height;
-                int nb_component;
-                stbi_set_flip_vertically_on_load(1);
-                unsigned char* image = stbi_load(texture_filename[i-1].c_str(), &width, &height, &nb_component, 0);
-                if(image == nullptr) {
-                    throw(std::string("Failed to load texture"));
-                }
-                glGenTextures(1, &image_texture_id_[i-1]);
-                glBindTexture(GL_TEXTURE_2D, image_texture_id_[i-1]);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                if(nb_component == 3) {
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
-                                 GL_RGB, GL_UNSIGNED_BYTE, image);
-                } else if(nb_component == 4) {
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                                 GL_RGBA, GL_UNSIGNED_BYTE, image);
-                }
-                texture_ids[i-1] = glGetUniformLocation(program_id_, texture_uniform[i-1]);
-                glUniform1i(texture_ids[i-1], i /*GL_TEXTURE i*/);
-                // cleanup
-                glBindTexture(GL_TEXTURE_2D, 0);
-                stbi_image_free(image);
-            }
-
             {
                 int width;
                 int height;
@@ -261,8 +175,8 @@ class Quad {
                                  GL_RGBA, GL_UNSIGNED_BYTE, image);
                 }
 
-                GLuint tex_id = glGetUniformLocation(program_id_, "tex1");
-                glUniform1i(tex_id, 5 /*GL_TEXTURE5*/);
+                GLuint tex_id = glGetUniformLocation(program_id_, "normalMap");
+                glUniform1i(tex_id, 1 /*GL_TEXTURE5*/);
 
                 // cleanup
                 glBindTexture(GL_TEXTURE_2D, 0);
@@ -296,8 +210,8 @@ class Quad {
                                  GL_RGBA, GL_UNSIGNED_BYTE, image);
                 }
 
-                GLuint tex_id = glGetUniformLocation(program_id_, "tex5");
-                glUniform1i(tex_id, 6 /*GL_TEXTURE6*/);
+                GLuint tex_id = glGetUniformLocation(program_id_, "dudvMap");
+                glUniform1i(tex_id, 2 /*GL_TEXTURE6*/);
 
                 // cleanup
                 glBindTexture(GL_TEXTURE_2D, 0);
@@ -333,13 +247,9 @@ class Quad {
             // bind textures
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture_id_);
-            glActiveTexture(GL_TEXTURE0+5);
+            glActiveTexture(GL_TEXTURE0+1);
             glBindTexture(GL_TEXTURE_2D, texture_map_);
-            for(int i = 1; i<4; i++) {
-                glActiveTexture(GL_TEXTURE0 + i);
-                glBindTexture(GL_TEXTURE_2D, image_texture_id_[i-1]);
-            }
-            glActiveTexture(GL_TEXTURE0+6);
+            glActiveTexture(GL_TEXTURE0+2);
             glBindTexture(GL_TEXTURE_2D, texture_dudv_);
 
             // 0: False, 1: True

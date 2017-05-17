@@ -13,11 +13,12 @@
 #include "screenquad/screenquad.h"
 #include "trackball.h"
 #include "quad/quad.h"
+#include "water/water.h"
 
 Cube cube;
 
 Quad quad;
-Quad water;
+Water water;
 
 int window_width = 800;
 int window_height = 600;
@@ -97,7 +98,7 @@ void Init(GLFWwindow* window) {
 
     screenquad.Init(window_width, window_height);
     quad.Init(framebuffer_texture_id, 0.0);
-    water.Init(waterbuffer_texture_id, 1.0);
+    water.Init(waterbuffer_texture_id);
     cube.Init();
 
 
@@ -203,7 +204,7 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     // when the window is resized, the framebuffer and the screenquad
     // should also be resized
     framebuffer.Cleanup();
-    framebuffer.Init(window_width, window_height);
+    framebuffer.Init(window_width, window_height, true);
     screenquad.UpdateSize(window_width, window_height);
 
 //    waterbuffer.Cleanup();
