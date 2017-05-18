@@ -322,7 +322,7 @@ void MousePos(GLFWwindow* window, double x, double y) {
                 vec3 old_cam_look = cam_look;
                 vec3 look_direction = cam_look-cam_pos;
                 vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(look_direction,cam_up))*mouse_dif.x,look_direction);
-                mat4 rotation = rotate(mat4(1.0f),0.03f,rotation_axis);
+                mat4 rotation = rotate(mat4(1.0f),0.04f,rotation_axis);
                 vec3 new_cam_look = glm::vec3(rotation * glm::vec4(cam_look-cam_pos, 0.0));
                 vec3 new_cam_up = vec3(0.0,0.0,1.0);//glm::vec3(rotation * glm::vec4(cam_up, 0.0));
                 cam_up = normalize(new_cam_up);
