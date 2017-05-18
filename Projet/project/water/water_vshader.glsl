@@ -21,11 +21,11 @@ uniform int triangles_number;
 uniform float time;
 uniform float speed;
 
-const float density = 0.2;
-const float gradient = 1.5;
+const float density = 0.07;
+const float gradient = 10;
 
 const float wave_strength = 0.007;
-const float tiling = 4.0;
+const float tiling = 40.0;
 
 void main() {
     mat4 MV = view * model;
@@ -44,7 +44,7 @@ void main() {
     light_dir = normalize(light_pos-vec3(vpoint_mv));
     view_dir = normalize(-vec3(vpoint_mv));
 
-    water = texture(normalMap, vec2(uv.x + speed, uv.y)*tiling).rgb;
+    water = texture(normalMap, vec2(uv.x + speed, uv.y)*tiling).rgb * wave_strength;
     dudv = (texture(dudvMap, vec2(uv.x + speed, uv.y)*tiling).rg * 2.0 - 1.0) * wave_strength;
     dudv += (texture(dudvMap, vec2(- uv.x - speed, uv.y + speed)*tiling).rg * 2.0 - 1.0) * wave_strength;
 

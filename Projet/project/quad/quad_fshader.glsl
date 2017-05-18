@@ -37,7 +37,7 @@ void main() {
             discard;
         }
         color = vec4(res_color,1.0f);
-        color = mix(vec4(0.5, 0.5, 0.5, 1.0), color, visibility);
+        color = mix(vec4(0.4, 0.4, 0.4, 1.0), color, visibility);
 
     } else {
         int window_width = textureSize(tex, 0).x;

@@ -27,8 +27,8 @@ uniform int triangles_number;
 uniform float time;
 uniform float speed;
 
-const float density = 0.2;
-const float gradient = 1.5;
+const float density = 0.07;
+const float gradient = 10;
 
 const float wave_strength = 0.007;
 const float tiling = 4.0;

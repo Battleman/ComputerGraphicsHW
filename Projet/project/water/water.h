@@ -14,7 +14,7 @@ class Water {
         GLuint texture_map_;            //normalMap for water
         GLuint texture_dudv_;            //dudvMap for water
         GLuint num_indices_;            // number of vertices to render
-        float move_factor = 0.03;
+        float move_factor = 0.003;
 
     public:
 
