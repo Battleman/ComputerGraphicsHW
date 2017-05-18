@@ -41,7 +41,6 @@ void main() {
     res_color += (mix_color*max(0.0f,dot(normal,light_dirn))*Ld);
     res_color += (mix_color*pow(max(0.0f,dot(r,view_dirn)),alpha)*Ls);
 
-    color = vec4(res_color.x,res_color.y,res_color.z,0.6);
-    color = mix(vec4(0.4, 0.4, 0.4, 1.0), color, visibility);
+    color = vec4(res_color.x,res_color.y,res_color.z,visibility);
 
 }

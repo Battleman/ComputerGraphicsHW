@@ -178,8 +178,8 @@ void Display() {
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    quad.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
     cube.Draw(projection_matrix * view_matrix * trackball_matrix);
+    quad.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
     water.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
