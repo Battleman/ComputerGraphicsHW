@@ -70,12 +70,12 @@ static const glm::vec2 CubeUVs[] =
     glm::vec2(0.34, 0.25),
     glm::vec2(0.34, 0.0),
 
-    glm::vec2(0.0, 0.749),
-    glm::vec2(0.34, 0.749),
-    glm::vec2(0.0, 0.51),
-    glm::vec2(0.34, 0.749),
-    glm::vec2(0.0, 0.51),
-    glm::vec2(0.34, 0.51),
+    glm::vec2(0.0, 0.7499),
+    glm::vec2(0.34, 0.7499),
+    glm::vec2(0.0, 0.501),
+    glm::vec2(0.34, 0.7499),
+    glm::vec2(0.0, 0.501),
+    glm::vec2(0.34, 0.501),
 
     glm::vec2(0.665, 0.75),
     glm::vec2(0.34, 0.75),
@@ -84,12 +84,12 @@ static const glm::vec2 CubeUVs[] =
     glm::vec2(0.665, 1.0),
     glm::vec2(0.34, 1.0),
 
-    glm::vec2(0.665, 0.51),
-    glm::vec2(0.665, 0.749),
-    glm::vec2(1.0, 0.51),
-    glm::vec2(0.665, 0.749),
-    glm::vec2(1.0, 0.51),
-    glm::vec2(1.0, 0.749)
+    glm::vec2(0.665, 0.501),
+    glm::vec2(0.665, 0.7499),
+    glm::vec2(1.0, 0.501),
+    glm::vec2(0.665, 0.7499),
+    glm::vec2(1.0, 0.501),
+    glm::vec2(1.0, 0.7499)
 };
 
 class Cube {
