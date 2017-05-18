@@ -44,10 +44,10 @@ double water_height = 0.0;
 vec4 r_plane(0.0,0.0,1.0,0.0); //TODO paramétrer la hauteur de l'eau
 vec4 initial_rplane(0.0,0.0,1.0,0);
 vec3 translate_vector_mir(0.0f, 0.0f, 4.0f);
-vec3 cam_pos(0.0f, 0.0f, 10.0f);
+vec3 cam_pos(5.0f, 2.0f, 10.0f);
 vec3 cam_pos_mir(2.0f, 2.0f, -2.9f);
 vec3 cam_look(0.0f, 0.0f, 0.0f);
-vec3 cam_up(0.0f, 1.0f, 0.0f);
+vec3 cam_up(0.0f, 0.0f, 1.0f);
 bool cam_forward = false;
 bool cam_backward = false;
 bool cam_left = false;
@@ -319,13 +319,16 @@ void MousePos(GLFWwindow* window, double x, double y) {
             vec2 mouse_dif = mouse_anchor - TransformScreenCoords(window, x, y);
             if(length(mouse_dif) > 0.0) {
                 mouse_anchor = TransformScreenCoords(window, x, y);
+                vec3 old_cam_look = cam_look;
                 vec3 look_direction = cam_look-cam_pos;
-                vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(cam_look-cam_pos,cam_up))*mouse_dif.x,look_direction);
+                vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(look_direction,cam_up))*mouse_dif.x,look_direction);
                 mat4 rotation = rotate(mat4(1.0f),0.03f,rotation_axis);
                 vec3 new_cam_look = glm::vec3(rotation * glm::vec4(cam_look-cam_pos, 0.0));
-                vec3 new_cam_up = glm::vec3(rotation * glm::vec4(cam_up, 0.0));
-                cam_look = cam_pos+(normalize(new_cam_look)*2.0f);
+                vec3 new_cam_up = vec3(0.0,0.0,1.0);//glm::vec3(rotation * glm::vec4(cam_up, 0.0));
                 cam_up = normalize(new_cam_up);
+                cam_look = cam_pos+(normalize(new_cam_look)*2.0f);
+                if(abs(normalize(cam_look-cam_pos).z) > cam_up.z-0.05) cam_look = old_cam_look;
+
             }
 
     }
