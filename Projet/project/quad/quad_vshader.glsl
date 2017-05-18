@@ -8,6 +8,7 @@ out vec3 material;
 out float height;
 out vec3 water;
 out vec2 dudv;
+out float visibility;
 //out vec3 normal_mv;
 
 uniform float isWater;
@@ -26,29 +27,29 @@ uniform int triangles_number;
 uniform float time;
 uniform float speed;
 
+const float density = 0.2;
+const float gradient = 1.5;
+
 const float wave_strength = 0.007;
 const float tiling = 4.0;
 
 void main() {
     mat4 MV = view * model;
-<<<<<<< HEAD
+
     vec2 uv = (position + vec2(10.0, 10.0)) * 0.05;
-=======
-    vec2 uv = (position + vec2(1.0, 1.0)) * 0.5;
     vec3 normal_mv = vec3(0.0);
->>>>>>> 9de118d2879d74cadafca715b5fa9ffe59c76ef4
 
     if(isWater == 0) {
-        height = texture(tex,uv).r;
+        height = texture(tex,uv).r+0.5;
 
-<<<<<<< HEAD
-        vpoint_mv = MV * vec4(position.x,position.y,height*10, 1.0);
-=======
-        vpoint_mv = MV * vec4(position.x,position.y,height/4.0, 1.0);
->>>>>>> 9de118d2879d74cadafca715b5fa9ffe59c76ef4
+        vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
         gl_Position = projection * vpoint_mv;
         light_dir = normalize(light_pos-vec3(vpoint_mv));
         view_dir = normalize(-vec3(vpoint_mv));
+
+        float distance = length(vpoint_mv.xyz);
+        visibility = exp(-pow((distance*density),gradient));
+        visibility = clamp(visibility, 0.0, 1.0);
 
 //         I'm keeping this piece of code in case I'd need to compute normals in the vertex shader
         float offset = 1.0f/float(triangles_number*1.0);

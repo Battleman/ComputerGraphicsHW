@@ -58,6 +58,7 @@ class Water {
                 std::vector<GLuint> indices;
 
                 int grid_dim = 512;
+                float grid_size = 20.0f;
 
                 GLuint grim_dim_id = glGetUniformLocation(program_id_, "triangles_number");
                 glUniform1i(grim_dim_id, grid_dim);
@@ -72,6 +73,8 @@ class Water {
                 //half the size because the grid must be a square, so their vertices
                 //are outside the second loop.
 
+
+                /*
                 int index = 0;
                 vertices.push_back(-1.0f);
                 vertices.push_back(-1.0f);
@@ -116,6 +119,32 @@ class Water {
                         indices.push_back(index++);
                     }
 
+                }
+                */
+
+                float grid_start = -grid_size/2.0;
+                for(int i = 0; i < grid_dim; i++) {
+                    for(int j = 0; j < grid_dim; j++) {
+                        vertices.push_back(grid_start+(grid_size/(float)grid_dim)*j);
+                        vertices.push_back(grid_start+(grid_size/(float)grid_dim)*i);
+                    }
+                }
+                for(int i = 0; i < grid_dim-1; i++) {
+                    if(i%2 == 0) { //forward loop
+                        for(int j = 0; j < grid_dim-1; j++) {
+                            indices.push_back(grid_dim*i+j);
+                            indices.push_back(grid_dim*(1+i)+j);
+                            indices.push_back(grid_dim*i+j+1);
+                            indices.push_back(grid_dim*(1+i)+1+j);
+                        }
+                    } else { //backward loop
+                        for(int j = grid_dim-2; j >= 0; j--) {
+                            indices.push_back(grid_dim*(1+i)+1+j);
+                            indices.push_back(grid_dim*i+j+1);
+                            indices.push_back(grid_dim*(1+i)+j);
+                            indices.push_back(grid_dim*i+j);
+                        }
+                    }
                 }
 
 

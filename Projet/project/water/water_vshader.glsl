@@ -29,7 +29,7 @@ const float tiling = 4.0;
 
 void main() {
     mat4 MV = view * model;
-    vec2 uv = (position + vec2(1.0, 1.0)) * 0.5;
+    vec2 uv = (position + vec2(10.0, 10.0)) * 0.05;
     vec3 normal_mv = vec3(0.0);
 
     float height = 0.001*sin((position.x+position.y-time)*6.0f);

@@ -7,6 +7,8 @@ in vec3 light_dir, view_dir;
 in float height;
 in vec3 water;
 in vec2 dudv;
+in float visibility;
+
 
 uniform float isWater;
 uniform vec3 La, Ld, Ls;
@@ -35,6 +37,8 @@ void main() {
             discard;
         }
         color = vec4(res_color,1.0f);
+        color = mix(vec4(0.5, 0.5, 0.5, 1.0), color, visibility);
+
     } else {
         int window_width = textureSize(tex, 0).x;
         int window_height = textureSize(tex, 0).y;
