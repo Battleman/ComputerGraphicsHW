@@ -11,6 +11,7 @@ uniform int[512] p;
 
 int repeat = 256;
 
+/**Those are intermediate functions for Perlin Noise*/
 int inc(int num) {
     num++;
     if(repeat > 0) num = int(mod(num, repeat));
@@ -40,6 +41,7 @@ float grad(int hash, float x, float y) {
     return 0.0f;
 }
 
+/**Perlin Noise*/
 float Perlin(float x, float y) {
     if(repeat > 0) {
         x = mod(x, repeat);
@@ -72,27 +74,7 @@ float Perlin(float x, float y) {
     return noise;
 }
 
-
-//float OctavePerlin(float x, float y, int octaves, float persistence) {
-//    float total = 0;
-//    float frequency = 1;
-//    float amplitude = 1;
-//    float maxValue = 0;  // Used for normalizing result to 0.0 - 1.0
-//    for(int i=0;i<octaves;i++) {
-//        total += Perlin(x * frequency, y * frequency) * amplitude;
-
-//        maxValue += amplitude;
-
-//        amplitude *= persistence;
-//        frequency *= 2;
-//    }
-
-
-
-//    return total/maxValue;
-//}
-
-
+/*fractal Brownian Motion*/
 float fBm(float x, float y, float H, float lacunarity, int octaves) {
     float value = 0.0;
     /* inner loop of fractal construction */
@@ -103,22 +85,23 @@ float fBm(float x, float y, float H, float lacunarity, int octaves) {
     }
     return value;
 }
+/**Similar : multifractal*/
 float multifractal(float x, float y, float H, float lacunarity, int octaves, float offset) {
     float value = 1.0;
-    /* inner loop of fractal construction */
     for (int i = 0; i < octaves; i++) {
-        value *= (-abs(Perlin(x, y))+1+offset) * pow(lacunarity, -H*i); //value1
-//        value *= (1-abs(Perlin(x, y))+offset) * pow(lacunarity, -H*i); //1
+        value *= (1-abs(Perlin(x, y))+offset) * pow(lacunarity, -H*i); //value1
         x *= lacunarity;
         y *= lacunarity;
     }
     return value;
 }
 
+
+
 void main() {
+    /*Heightmap computed with hybrid of fBm and multifractal*/
     float color_fBm = fBm(10*uv.x, 10*uv.y, 1.2, 6, 10);
-    float colorFractal = multifractal(5*uv.x, 5*uv.y, 2.0f, 1.1f, 10, 1.7f); //value1 acceptable
+    float colorFractal = multifractal(5*uv.x, 5*uv.y, 2.0f, 1.1f, 10, 1.7f);
     color = vec3((color_fBm+colorFractal)/1.2 - 1.3);
-//    color = vec3(color_fBm);
 }
 

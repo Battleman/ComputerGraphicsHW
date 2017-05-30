@@ -14,6 +14,7 @@ class ScreenQuad {
         float screenquad_width_;
         float screenquad_height_;
 
+        /*permutation table, rearanged when necessary*/
         int permutation[256] = { 151,160,137,91,90,15,
                                  131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
                                  190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
@@ -35,7 +36,6 @@ class ScreenQuad {
     public:
         void Init(float screenquad_width, float screenquad_height) {
 
-
             // set screenquad size
             this->screenquad_width_ = screenquad_width;
             this->screenquad_height_ = screenquad_height;
@@ -49,19 +49,18 @@ class ScreenQuad {
 
             glUseProgram(program_id_);
 
-            //Send the permutation table
-#ifdef DEBUG_SEED
-            srand(DEBUG_SEED);
-#else
-            srand(time(NULL));
-#endif
+            /*define seed (if we need a fixed one for debugging purpose)*/
+            #ifdef DEBUG_SEED
+                srand(DEBUG_SEED);
+            #else
+                srand(time(NULL));
+            #endif
+            /*Create new and bigger permutation table at random*/
             for(int x=0;x<512;x++) {
-                //std::cout << time(NULL) << std::endl;
                 int random = rand() % 256;
-                //std::cout << random << std::endl;
                 p[x] = permutation[random];
             }
-
+            //Send the permutation table
             glUniform1iv(glGetUniformLocation(program_id_, "p"), 512, &p[0]);
 
             // vertex one vertex Array
