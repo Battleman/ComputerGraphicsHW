@@ -4,17 +4,19 @@ file(GLOB_RECURSE HEADERS "*.h")
 
 # these files are copied only once
 file(GLOB TEXTURES
-    cube/cube_texture.tga
-    cube/skybox_texture.tga
+    skybox/skybox_texture.tga
+
     quad/quad_texture.tga
     quad/quad_texture.tga
-    cube/sky.jpg
-    cube/right.jpg
-    cube/top.jpg
-    cube/bottom.jpg
-    cube/back.jpg
-    cube/front.jpg
-    cube/left.jpg
+
+    skybox/sky.jpg
+    skybox/right.jpg
+    skybox/top.jpg
+    skybox/bottom.jpg
+    skybox/back.jpg
+    skybox/front.jpg
+    skybox/left.jpg
+
     quad/RockTexture.jpg
     quad/SandTexture.jpg
     quad/ForestTexture.jpg
@@ -26,7 +28,7 @@ copy_files_once(${TEXTURES})
 # you build (ie, you want the shaders there)
 file(GLOB SHADERS
     screenquad/*.glsl
-    cube/*.glsl
+    skybox/*.glsl
     quad/*.glsl
     water/*.glsl)
 deploy_shaders_to_build_dir(${SHADERS})

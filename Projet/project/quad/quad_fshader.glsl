@@ -20,6 +20,7 @@ uniform int discard_pix;
 out vec4 color;
 
 void main() {
+    /*We have 2 quads : the terrain and the water. This function treats both cases*/
     vec3 light_dirn = normalize(light_dir);
     vec3 view_dirn = normalize(view_dir);
     if(isWater == 0) {
@@ -28,17 +29,13 @@ void main() {
         vec3 normal_mv = normalize(cross(X,Y));
 
         vec3 res_color = vec3(0.0f);
-        //I'm keeping ambient and specular in case we need them for later
-        //vec3 r = normalize((2.0f*normal_mv*dot(normal_mv,light_dir))-light_dir);
-        //res_color += (material*La);
         res_color += (material*max(0.0f,dot(normal_mv,light_dirn))*Ld);
-        //res_color += (material*pow(max(0.0f,dot(r,view_dir)),alpha)*Ls);
         if(discard_pix != 0 && height < 0) {
             discard;
         }
         color = vec4(res_color,visibility);
 
-    } else {
+    } else { //terrain
         int window_width = textureSize(tex, 0).x;
         int window_height = textureSize(tex, 0).y;
 
@@ -55,7 +52,6 @@ void main() {
         vec3 color_from_texture = vec3(0.3, 0.3, 0.5);
         vec3 color_from_mirror = texture(tex,vec2(_u, _v)+ dudv).rgb;
         mix_color = mix(color_from_texture, color_from_mirror, vec3(.35));
-//        color = color_from_texture;
         res_color += (mix_color*La);
         res_color += (mix_color*max(0.0f,dot(normal,light_dirn))*Ld);
         res_color += (mix_color*pow(max(0.0f,dot(r,view_dirn)),alpha)*Ls);

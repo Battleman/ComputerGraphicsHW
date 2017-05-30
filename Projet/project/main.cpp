@@ -9,13 +9,12 @@
 #include "framebuffer.h"
 #include "waterbuffer.h"
 
-#include "cube/cube.h"
+#include "skybox/skybox.h"
 #include "screenquad/screenquad.h"
-#include "trackball.h"
 #include "quad/quad.h"
 #include "water/water.h"
 
-Cube skybox;
+Skybox skybox;
 
 Quad quad;
 Water water;
@@ -26,19 +25,12 @@ int window_height = 600;
 FrameBuffer framebuffer;
 WaterBuffer waterbuffer;
 ScreenQuad screenquad;
-Trackball trackball;
 
 using namespace glm;
 
 mat4 projection_matrix;
 mat4 view_matrix;
-mat4 cube_scale;
-mat4 cube_model_matrix;
-mat4 trackball_matrix;
-mat4 old_trackball_matrix;
-mat4 view_matrix_mir;
 mat4 reflect_mat;
-mat4 mirror_mat;
 
 //double water_height = 0.0;
 vec4 r_plane(0.0,0.0,1.0,0.0);
@@ -70,11 +62,6 @@ void Init(GLFWwindow* window) {
                         vec4( -2*r_plane.x*r_plane.z, -2*r_plane.y*r_plane.z, 1.0-2*r_plane.z*r_plane.z, 0.0),
                         vec4( -2*r_plane.x*r_plane.w, -2*r_plane.y*r_plane.w, -2*r_plane.z*r_plane.w, 1.0));
 
-    mirror_mat = mat4(  vec4( 1.0, 0.0, 0.0, 0.0),
-                        vec4( 0.0, 1.0, 0.0, 0.0),
-                        vec4( 0.0, 0.0, 1.0, 0.0),
-                        vec4( 0.0, 0.0, 0.0, 1.0));
-
     // on retina/hidpi displays, pixels != screen coordinates
     // this unsures that the framebuffer has the same size as the window
     glfwGetFramebufferSize(window, &window_width, &window_height);
@@ -85,18 +72,14 @@ void Init(GLFWwindow* window) {
     quad.Init(framebuffer_texture_id, 0.0);
     water.Init(waterbuffer_texture_id);
     skybox.Init();
-
-
 }
 
 void RecomputeReflectionViewMat() {
-    r_plane = initial_rplane*trackball_matrix;
+    r_plane = initial_rplane;
     vec3 r_normal = normalize(vec3(r_plane.x,r_plane.y,r_plane.z));
     cam_pos_mir = cam_pos - 2*dot(cam_pos,r_normal)*r_normal;
-    reflect_mat = mat4(  vec4( 1.0, 0.0, 0.0, 0.0),
-                         vec4( 0.0, 1.0, 0.0, 0.0),
-                         vec4( 0.0, 0.0, -1.0, 0.0),
-                         vec4( 0.0, 0.0, 0.0, 1.0));
+    reflect_mat = IDENTITY_MATRIX;
+    reflect_mat[2][2] = -1.0;
 }
 
 void UpdateCamera() {
@@ -126,6 +109,7 @@ void UpdateCamera() {
 }
 void Display() {
     UpdateCamera();
+
     //Perlin Noise
     framebuffer.Clear();
     framebuffer.Bind();
@@ -142,8 +126,8 @@ void Display() {
     waterbuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        quad.Draw(trackball_matrix*reflect_mat,view_matrix, projection_matrix,1);
-        skybox.Draw(projection_matrix * view_matrix * trackball_matrix * reflect_mat);
+        quad.Draw(reflect_mat,view_matrix, projection_matrix,1);
+        skybox.Draw(projection_matrix * view_matrix * reflect_mat);
     }
     waterbuffer.Unbind();
 
@@ -151,9 +135,9 @@ void Display() {
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    skybox.Draw(projection_matrix * view_matrix * trackball_matrix);
-    quad.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
-    water.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
+    skybox.Draw(/*IDENTITY_MATRIX * */ projection_matrix * view_matrix );
+    quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix, 0); //I is used as the model matrix
+    water.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix, 0);
 }
 
 
@@ -168,6 +152,12 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     projection_matrix = perspective(45.0f, ratio, 0.001f, 40.0f);
 
     glViewport(0, 0, window_width, window_height);
+
+    //TODO : check with Boris, might solve resize issue
+    reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
+                        vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
+                        vec4( -2*r_plane.x*r_plane.z, -2*r_plane.y*r_plane.z, 1.0-2*r_plane.z*r_plane.z, 0.0),
+                        vec4( -2*r_plane.x*r_plane.w, -2*r_plane.y*r_plane.w, -2*r_plane.z*r_plane.w, 1.0));
 
     // when the window is resized, the framebuffer and the screenquad
     // should also be resized
@@ -240,15 +230,19 @@ void MousePos(GLFWwindow* window, double x, double y) {
         vec2 mouse_dif = mouse_anchor - TransformScreenCoords(window, x, y);
         if(length(mouse_dif) > 0.0) {
             mouse_anchor = TransformScreenCoords(window, x, y);
-            vec3 old_cam_look = cam_look;
+            vec3 old_cam_look = cam_look; //backup current cam_look
             vec3 look_direction = cam_look-cam_pos;
-            vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(look_direction,cam_up))*mouse_dif.x,look_direction);
-            mat4 rotation = rotate(mat4(1.0f),0.04f,rotation_axis);
+            vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) +
+                                 cross(normalize(cross(look_direction,cam_up)) * mouse_dif.x,look_direction);
+            mat4 rotation = rotate(IDENTITY_MATRIX,0.04f,rotation_axis);
             vec3 new_cam_look = glm::vec3(rotation * glm::vec4(cam_look-cam_pos, 0.0));
-            vec3 new_cam_up = vec3(0.0,0.0,1.0);//glm::vec3(rotation * glm::vec4(cam_up, 0.0));
+            vec3 new_cam_up = vec3(0.0,0.0,1.0);
             cam_up = normalize(new_cam_up);
             cam_look = cam_pos+(normalize(new_cam_look)*2.0f);
-            if(abs(normalize(cam_look-cam_pos).z) > cam_up.z-0.05) cam_look = old_cam_look;
+            if(abs(normalize(cam_look-cam_pos).z) > cam_up.z-0.05){
+                /*If fail, restore previous cam_look*/
+                cam_look = old_cam_look;
+            }
         }
     }
 }
