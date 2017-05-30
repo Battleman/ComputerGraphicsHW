@@ -15,7 +15,7 @@
 #include "quad/quad.h"
 #include "water/water.h"
 
-Cube cube;
+Cube skybox;
 
 Quad quad;
 Water water;
@@ -40,8 +40,8 @@ mat4 view_matrix_mir;
 mat4 reflect_mat;
 mat4 mirror_mat;
 
-double water_height = 0.0;
-vec4 r_plane(0.0,0.0,1.0,0.0); //TODO paramétrer la hauteur de l'eau
+//double water_height = 0.0;
+vec4 r_plane(0.0,0.0,1.0,0.0);
 vec4 initial_rplane(0.0,0.0,1.0,0);
 vec3 translate_vector_mir(0.0f, 0.0f, 4.0f);
 vec3 cam_pos(5.0f, 2.0f, 10.0f);
@@ -54,17 +54,11 @@ bool cam_left = false;
 bool cam_right = false;
 vec2 mouse_anchor(0.0f);
 
-double zoom;
 float filter = 2.0f;
 
 void Init(GLFWwindow* window) {
     glClearColor(1.0, 1.0, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
-
-    // setup view and projection matrices
-    //view_matrix_mir = lookAt(cam_pos_mir, cam_look, cam_up);
-    //view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
-    //view_matrix_mir = lookAt(vec3(0.0,0.0,-4.0), vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
 
     view_matrix = lookAt(cam_pos, cam_look, cam_up);
     //view_matrix = translate(mat4(1.0f), vec3(0.0f, 0.0f, -4.0f));
@@ -75,23 +69,14 @@ void Init(GLFWwindow* window) {
                         vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
                         vec4( -2*r_plane.x*r_plane.z, -2*r_plane.y*r_plane.z, 1.0-2*r_plane.z*r_plane.z, 0.0),
                         vec4( -2*r_plane.x*r_plane.w, -2*r_plane.y*r_plane.w, -2*r_plane.z*r_plane.w, 1.0));
-    //view_matrix_mir = reflect_mat*view_matrix;
 
     mirror_mat = mat4(  vec4( 1.0, 0.0, 0.0, 0.0),
                         vec4( 0.0, 1.0, 0.0, 0.0),
                         vec4( 0.0, 0.0, 1.0, 0.0),
                         vec4( 0.0, 0.0, 0.0, 1.0));
-    // create the model matrix (remember OpenGL is right handed)
-    // accumulated transformation
-//    cube_model_matrix = scale(IDENTITY_MATRIX, vec3(50));
-//    cube_model_matrix = translate(cube_model_matrix, vec3(0.0, 0.0, 0.6));
-//    cube_scale = mat4(0.25f, 0.0f, 0.0f, 0.0f,
-//                      0.0f, 0.25f, 0.0f, 0.0f
-//                      0.0f, 0.0f, 0.25f, 0.0f,
-//                      0.0f, 0.0f, 0.0f, 1.0f);
+
     // on retina/hidpi displays, pixels != screen coordinates
     // this unsures that the framebuffer has the same size as the window
-    // (see http://www.glfw.org/docs/latest/window.html#window_fbsize)
     glfwGetFramebufferSize(window, &window_width, &window_height);
     GLuint framebuffer_texture_id = framebuffer.Init(window_width, window_height, true);
     GLuint waterbuffer_texture_id = waterbuffer.Init(window_width, window_height, true);
@@ -99,7 +84,7 @@ void Init(GLFWwindow* window) {
     screenquad.Init(window_width, window_height);
     quad.Init(framebuffer_texture_id, 0.0);
     water.Init(waterbuffer_texture_id);
-    cube.Init();
+    skybox.Init();
 
 
 }
@@ -108,24 +93,14 @@ void RecomputeReflectionViewMat() {
     r_plane = initial_rplane*trackball_matrix;
     vec3 r_normal = normalize(vec3(r_plane.x,r_plane.y,r_plane.z));
     cam_pos_mir = cam_pos - 2*dot(cam_pos,r_normal)*r_normal;
-    //reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
-    //                    vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
-    //                    vec4( -2*r_plane.x*r_plane.z, -2*r_plane.y*r_plane.z, 1.0-2*r_plane.z*r_plane.z, 0.0),
-    //                    vec4( -2*r_plane.x*r_plane.w, -2*r_plane.y*r_plane.w, -2*r_plane.z*r_plane.w, 1.0));
-    //view_matrix_mir = lookAt(cam_pos_mir, cam_look, r_normal);
-    //view_matrix_mir = translate(mat4(1.0f), vec3(0.0f, 0.0f, 4.0f));
-    //view_matrix_mir = translate(mat4(1.0f),translate_vector_mir);
-    //view_matrix_mir = reflect_mat*view_matrix;
     reflect_mat = mat4(  vec4( 1.0, 0.0, 0.0, 0.0),
                          vec4( 0.0, 1.0, 0.0, 0.0),
                          vec4( 0.0, 0.0, -1.0, 0.0),
                          vec4( 0.0, 0.0, 0.0, 1.0));
-    //reflect_mat = glm::rotate(reflect_mat,3.14159f,vec3(0,1,0));
-    //reflect_mat = glm::rotate(reflect_mat,-3.14159f/2.0f,vec3(0,0,1));
-    //reflect_mat[0][0] = - reflect_mat[0][0];
 }
 
 void UpdateCamera() {
+    /** Update camera position according to the pressed button*/
     vec3 translate_vector;
     if(cam_forward) {
         translate_vector = normalize(cam_look-cam_pos)/3.0f;
@@ -149,9 +124,7 @@ void UpdateCamera() {
     }
     view_matrix = lookAt(cam_pos, cam_look, cam_up);
 }
-
 void Display() {
-    // render to framebuffer
     UpdateCamera();
     //Perlin Noise
     framebuffer.Clear();
@@ -170,22 +143,17 @@ void Display() {
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         quad.Draw(trackball_matrix*reflect_mat,view_matrix, projection_matrix,1);
-        cube.Draw(projection_matrix * view_matrix * trackball_matrix * reflect_mat);
+        skybox.Draw(projection_matrix * view_matrix * trackball_matrix * reflect_mat);
     }
     waterbuffer.Unbind();
 
     //Draw terrain and water plane
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    cube.Draw(projection_matrix * view_matrix * trackball_matrix);
+
+    skybox.Draw(projection_matrix * view_matrix * trackball_matrix);
     quad.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
     water.Draw(trackball_matrix, view_matrix, projection_matrix, 0);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-    //cube.Draw(view_projection);
-//    quad.Draw(trackball_matrix, view_matrix, projection_matrix,0);
-//    water.Draw(trackball_matrix, view_matrix, projection_matrix,0);
 }
 
 
@@ -206,9 +174,6 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     framebuffer.Cleanup();
     framebuffer.Init(window_width, window_height, true);
     screenquad.UpdateSize(window_width, window_height);
-
-//    waterbuffer.Cleanup();
-//    waterbuffer.Init(window_width, window_height);
 }
 
 void ErrorCallback(int error, const char* description) {
@@ -216,38 +181,38 @@ void ErrorCallback(int error, const char* description) {
 }
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
+    switch(key){
+        case GLFW_KEY_ESCAPE :
+            if(action == GLFW_PRESS) {glfwSetWindowShouldClose(window, GL_TRUE);}
+        case GLFW_KEY_W: //forward
+            if(action == GLFW_PRESS) {
+                cam_forward = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_forward = false;
+            }
+            break;
+        case GLFW_KEY_S : //backward
+            if(action == GLFW_PRESS) {
+                cam_backward = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_backward = false;
+            }
+            break;
+        case GLFW_KEY_A : //left
+            if(action == GLFW_PRESS) {
+                cam_left = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_left = false;
+            }
+            break;
+        case GLFW_KEY_D: //right
+            if(action == GLFW_PRESS) {
+                cam_right = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_right = false;
+            }
+            break;
     }
-    if (key == GLFW_KEY_W) {
-        if(action == GLFW_PRESS) {
-            cam_forward = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_forward = false;
-        }
-    }
-    if (key == GLFW_KEY_S) {
-        if(action == GLFW_PRESS) {
-            cam_backward = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_backward = false;
-        }
-    }
-    if (key == GLFW_KEY_A) {
-        if(action == GLFW_PRESS) {
-            cam_left = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_left = false;
-        }
-    }
-    if (key == GLFW_KEY_D) {
-        if(action == GLFW_PRESS) {
-            cam_right = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_right = false;
-        }
-    }
-
 }
 
 // transforms glfw screen coordinates into normalized OpenGL coordinates.
@@ -262,19 +227,6 @@ vec2 TransformScreenCoords(GLFWwindow* window, int x, int y) {
 }
 
 void MouseButton(GLFWwindow* window, int button, int action, int mod) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        double x_i, y_i;
-        glfwGetCursorPos(window, &x_i, &y_i);
-        vec2 p = TransformScreenCoords(window, x_i, y_i);
-        trackball.BeingDrag(p.x, p.y);
-        old_trackball_matrix = trackball_matrix;
-        // Store the current state of the model matrix.
-    }
-//    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
-//        double x_i, y_i;
-//        glfwGetCursorPos(window, &x_i, &y_i);
-//        zoom = TransformScreenCoords(window, x_i, y_i)[1];
-//    }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         double x_i, y_i;
         glfwGetCursorPos(window, &x_i, &y_i);
@@ -283,54 +235,21 @@ void MouseButton(GLFWwindow* window, int button, int action, int mod) {
 }
 
 void MousePos(GLFWwindow* window, double x, double y) {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        vec2 p = TransformScreenCoords(window, x, y);
-        // TODO 3: Calculate 'trackball_matrix' given the return value of
-        // trackball.Drag(...) and the value stored in 'old_trackball_matrix'.
-        // See also the mouse_button(...) function.
-        trackball_matrix = trackball.Drag(p.x,p.y)*old_trackball_matrix ;
-    }
-
-    // zoom
-//    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-//        // TODO 4: Implement zooming. When the right mouse button is pressed,
-//        // moving the mouse cursor up and down (along the screen's y axis)
-//        // should zoom out and it. For that you have to update the current
-//        // 'view_matrix' with a translation along the z axis.
-//        // view_matrix = ...
-//        const float constant_factor = 4.0f;
-//        vec2 p = TransformScreenCoords(window, x, y);
-//        vec3 translate_vector = vec3(0.0,0.0,view_matrix[3][2]+((p[1]-zoom)*constant_factor));
-//        //view_matrix = translate(mat4(1.0f),translate_vector);
-
-//        //view_matrix = view_matrix* (float)(1+(translate_vector.length()/4.0));
-
-//        translate_vector_mir = vec3(0.0,0.0,view_matrix_mir[3][2]+((p[1]-zoom)*constant_factor));
-//        view_matrix_mir = translate(mat4(1.0f),translate_vector_mir);
-//        //view_matrix_mir = reflect_mat*view_matrix_mir;
-//        zoom = p[1];
-//        //I'd find it more intuitive to zoom out and in by scaling the object, why don't we do that?
-
-//    }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-
-        //std::cout << mouse_anchor.y << std::endl;
-
-            vec2 mouse_dif = mouse_anchor - TransformScreenCoords(window, x, y);
-            if(length(mouse_dif) > 0.0) {
-                mouse_anchor = TransformScreenCoords(window, x, y);
-                vec3 old_cam_look = cam_look;
-                vec3 look_direction = cam_look-cam_pos;
-                vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(look_direction,cam_up))*mouse_dif.x,look_direction);
-                mat4 rotation = rotate(mat4(1.0f),0.04f,rotation_axis);
-                vec3 new_cam_look = glm::vec3(rotation * glm::vec4(cam_look-cam_pos, 0.0));
-                vec3 new_cam_up = vec3(0.0,0.0,1.0);//glm::vec3(rotation * glm::vec4(cam_up, 0.0));
-                cam_up = normalize(new_cam_up);
-                cam_look = cam_pos+(normalize(new_cam_look)*2.0f);
-                if(abs(normalize(cam_look-cam_pos).z) > cam_up.z-0.05) cam_look = old_cam_look;
-
-            }
-
+        /*Update camera position, act as an "FPS" cam*/
+        vec2 mouse_dif = mouse_anchor - TransformScreenCoords(window, x, y);
+        if(length(mouse_dif) > 0.0) {
+            mouse_anchor = TransformScreenCoords(window, x, y);
+            vec3 old_cam_look = cam_look;
+            vec3 look_direction = cam_look-cam_pos;
+            vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(look_direction,cam_up))*mouse_dif.x,look_direction);
+            mat4 rotation = rotate(mat4(1.0f),0.04f,rotation_axis);
+            vec3 new_cam_look = glm::vec3(rotation * glm::vec4(cam_look-cam_pos, 0.0));
+            vec3 new_cam_up = vec3(0.0,0.0,1.0);//glm::vec3(rotation * glm::vec4(cam_up, 0.0));
+            cam_up = normalize(new_cam_up);
+            cam_look = cam_pos+(normalize(new_cam_look)*2.0f);
+            if(abs(normalize(cam_look-cam_pos).z) > cam_up.z-0.05) cam_look = old_cam_look;
+        }
     }
 }
 
@@ -395,7 +314,7 @@ int main(int argc, char *argv[]) {
 
     // cleanup
     quad.Cleanup();
-    cube.Cleanup();
+    skybox.Cleanup();
     framebuffer.Cleanup();
     screenquad.Cleanup();
     water.Cleanup();
