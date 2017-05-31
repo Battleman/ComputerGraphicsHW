@@ -48,7 +48,7 @@ vec2 mouse_anchor(0.0f);
 int terrainMode = 1;
 
 float filter = 2.0f;
-uint8 camera_mode = 1;
+uint8 camera_mode = 0;
 float bezierT = 0.0f;
 int bezierCurve = 0;
 vec3* bezierPoints;
@@ -136,7 +136,7 @@ void Init(GLFWwindow* window) {
     GLuint waterbuffer_texture_id = waterbuffer.Init(window_width, window_height, true);
 
     screenquad.Init(window_width, window_height);
-    quad.Init(framebuffer_texture_id, 0.0, vec2(0,0));
+    quad.Init(framebuffer_texture_id);
     water.Init(waterbuffer_texture_id);
     skybox.Init();
 }
@@ -277,7 +277,6 @@ void Display() {
         screenquad.Draw(terrainMode);
     }
     framebuffer.Unbind();
-
     framebuffer.Bind();
     {
         UpdateCamera();
@@ -417,67 +416,46 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 screenquad.Init(window_width, window_height);
             }
             break;
-    }
-    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-        camera_mode = 0;
-        std::cout << "Switched to free camera mode" << std::endl;
-        std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
-        bezierT = 0.0;
-        bezierCurve = 0;
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
-        camera_mode = 1;
-        std::cout << "Switched to ground camera mode" << std::endl;
-        std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
-        camera_mode = 2;
-        std::cout << "Switched to buttons-only camera mode" << std::endl;
-        std::cout << "Controls: wasd to move the camera, q to look up and e to look down" << std::endl;
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
-        camera_mode = 3;
-        std::cout << "Switched to automatic camera mode" << std::endl;
-        std::cout << "Controls: none" << std::endl;
-        cam_look = vec3(0.0,0.0,0.0);
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
-        camera_mode = 4;
-        std::cout << "Switched to trackball mode" << std::endl;
-        std::cout << "Controls: left click and drag to move the trackball" << std::endl;
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_W) {
+    case GLFW_KEY_1 :
         if(action == GLFW_PRESS) {
-            cam_forward = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_forward = false;
+            camera_mode = 0;
+            std::cout << "Switched to free camera mode" << std::endl;
+            std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
+            bezierT = 0.0;
+            bezierCurve = 0;
+            //trackball_matrix = IDENTITY_MATRIX;
         }
-    }
-    if (key == GLFW_KEY_S) {
+        break;
+    case GLFW_KEY_0:
         if(action == GLFW_PRESS) {
-            cam_backward = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_backward = false;
+            camera_mode = 1;
+            std::cout << "Switched to ground camera mode" << std::endl;
+            std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
         }
-    }
-    if (key == GLFW_KEY_A) {
+        break;
+    case GLFW_KEY_2:
         if(action == GLFW_PRESS) {
-            cam_left = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_left = false;
+            camera_mode = 2;
+            std::cout << "Switched to buttons-only camera mode" << std::endl;
+            std::cout << "Controls: wasd to move the camera, q to look up and e to look down" << std::endl;
         }
-    }
-    if (key == GLFW_KEY_D) {
+        break;
+    case GLFW_KEY_3:
         if(action == GLFW_PRESS) {
-            cam_right = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_right = false;
+            camera_mode = 3;
+            std::cout << "Switched to automatic camera mode" << std::endl;
+            std::cout << "Controls: none" << std::endl;
+            cam_look = vec3(0.0,0.0,0.0);
         }
+        break;
+    case GLFW_KEY_4:
+        if(action == GLFW_PRESS) {
+            camera_mode = 4;
+            std::cout << "Switched to trackball mode" << std::endl;
+            std::cout << "Controls: left click and drag to move the trackball" << std::endl;
+            //trackball_matrix = IDENTITY_MATRIX;
+        }
+        break;
     }
 }
 

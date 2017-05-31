@@ -19,7 +19,7 @@ class Quad {
 
     public:
 
-        void Init(GLuint texture, float is_water, glm::vec2 offset) {
+        void Init(GLuint texture) {
             // compile the shaders
             program_id_ = icg_helper::LoadShaders("quad_vshader.glsl",
                                                   "quad_fshader.glsl");
@@ -73,7 +73,7 @@ class Quad {
                 GLuint grim_dim_id = glGetUniformLocation(program_id_, "triangles_number");
                 glUniform1i(grim_dim_id, grid_dim);
 
-                float grid_start = (-grid_size/2.0)+offset.x;
+                float grid_start = (-grid_size/2.0);
                 for(int i = 0; i < grid_dim; i++) {
                     for(int j = 0; j < grid_dim; j++) {
                         vertices.push_back(grid_start+(grid_size/(float)grid_dim)*j);

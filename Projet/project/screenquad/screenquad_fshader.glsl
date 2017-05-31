@@ -102,17 +102,19 @@ void main() {
     /*Heightmap computed with hybrid of fBm and multifractal*/
     float color_fBm;
     float colorFractal;
-    if(mode <= 3){
-        color_fBm = fBm(10*uv.x, 10*uv.y, 1.2, 6, 10);
-        colorFractal = multifractal(5*uv.x, 5*uv.y, 2.0f, 1.1f, 10, 1.7f);
+
+    if(mode == 1 || mode == 2){
+        color_fBm = fBm(10*uv.x, 10*uv.y, 1.3, 6, 10);
+        colorFractal = multifractal(5*uv.x, 5*uv.y, 1.2f, 1.3f, 6, 1.6f);
     } else {
+
         color_fBm = fBm(7*uv.x, 7*uv.y, 1.2, 7, 15);
         colorFractal = multifractal(2*uv.x, 2*uv.y, 0.4f, 1.5f, 4, 0.9f);
     }
     if(mode == 2){
         color = vec3(color_fBm);
     } else if(mode == 3) {
-        color = vec3(colorFractal-1.8);
+        color = vec3(colorFractal);
     } else if(mode == 4){
         color = vec3(color_fBm);
     } else if(mode == 5){
