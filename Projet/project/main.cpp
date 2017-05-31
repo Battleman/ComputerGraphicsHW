@@ -69,7 +69,7 @@ void Init(GLFWwindow* window) {
     GLuint waterbuffer_texture_id = waterbuffer.Init(window_width, window_height, true);
 
     screenquad.Init(window_width, window_height);
-    quad.Init(framebuffer_texture_id, 0.0);
+    quad.Init(framebuffer_texture_id);
     water.Init(waterbuffer_texture_id);
     skybox.Init();
 }

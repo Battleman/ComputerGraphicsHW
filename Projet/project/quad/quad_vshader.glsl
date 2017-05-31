@@ -6,72 +6,46 @@ out vec3 light_dir, view_dir;
 out vec4 vpoint_mv;
 out vec3 material;
 out float height;
-out vec3 water;
-out vec2 dudv;
 out float visibility;
 
-uniform float isWater;
 uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
 uniform sampler2D tex;
-uniform sampler2D tex1;
 uniform sampler2D tex2;
 uniform sampler2D tex3;
 uniform sampler2D tex4;
-uniform sampler2D tex5;
 uniform vec3 light_pos;
 uniform int triangles_number;
 
-uniform float time;
-uniform float speed;
-
 const float density = 0.07;
 const float gradient = 10;
-
-const float wave_strength = 0.007;
-const float tiling = 4.0;
 
 void main() {
     mat4 MV = view * model;
 
     vec2 uv = (position + vec2(10.0, 10.0)) * 0.05;
     vec3 normal_mv = vec3(0.0);
+    height = texture(tex,uv).r+0.5;
 
-    if(isWater == 0) {
-        height = texture(tex,uv).r+0.5;
+    vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
+    gl_Position = projection * vpoint_mv;
+    light_dir = normalize(light_pos-vec3(vpoint_mv));
+    view_dir = normalize(-vec3(vpoint_mv));
 
-        vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
-        gl_Position = projection * vpoint_mv;
-        light_dir = normalize(light_pos-vec3(vpoint_mv));
-        view_dir = normalize(-vec3(vpoint_mv));
+    float distance = length(vpoint_mv.xyz);
+    visibility = exp(-pow((distance*density),gradient));
+    visibility = clamp(visibility, 0.0, 1.0);
 
-        float distance = length(vpoint_mv.xyz);
-        visibility = exp(-pow((distance*density),gradient));
-        visibility = clamp(visibility, 0.0, 1.0);
+    float offset = 1.0f/float(triangles_number*1.0);
+    vec4 X0point_mv = MV * vec4(position.x-offset,position.y,texture(tex,vec2(((position.x-offset)/2.0)+0.5,uv.y)).r, 1.0);
+    vec4 Y0point_mv = MV * vec4(position.x,position.y-offset,texture(tex,vec2(uv.x,((position.y-offset)/2.0)+0.5)).r, 1.0);
+    vec4 X1point_mv = MV * vec4(position.x+offset,position.y,texture(tex,vec2(((position.x+offset)/2.0)+0.5,uv.y)).r, 1.0);
+    vec4 Y1point_mv = MV * vec4(position.x,position.y+offset,texture(tex,vec2(uv.x,((position.y+offset)/2.0)+0.5)).r, 1.0);
 
-        float offset = 1.0f/float(triangles_number*1.0);
-        vec4 X0point_mv = MV * vec4(position.x-offset,position.y,texture(tex,vec2(((position.x-offset)/2.0)+0.5,uv.y)).r, 1.0);
-        vec4 Y0point_mv = MV * vec4(position.x,position.y-offset,texture(tex,vec2(uv.x,((position.y-offset)/2.0)+0.5)).r, 1.0);
-        vec4 X1point_mv = MV * vec4(position.x+offset,position.y,texture(tex,vec2(((position.x+offset)/2.0)+0.5,uv.y)).r, 1.0);
-        vec4 Y1point_mv = MV * vec4(position.x,position.y+offset,texture(tex,vec2(uv.x,((position.y+offset)/2.0)+0.5)).r, 1.0);
-
-        vec3 X = X1point_mv.xyz - X0point_mv.xyz;
-        vec3 Y = Y1point_mv.xyz - Y0point_mv.xyz;
-        normal_mv += normalize(cross(X,Y));
-
-    } else {
-        float height = 0.001*sin((position.x+position.y-time)*6.0f);
-
-        vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
-        gl_Position = projection * vpoint_mv;
-        light_dir = normalize(light_pos-vec3(vpoint_mv));
-        view_dir = normalize(-vec3(vpoint_mv));
-
-        water = texture(tex1, vec2(uv.x + speed, uv.y)*tiling).rgb;
-        dudv = (texture(tex5, vec2(uv.x + speed, uv.y)*tiling).rg * 2.0 - 1.0) * wave_strength;
-        dudv += (texture(tex5, vec2(- uv.x - speed, uv.y + speed)*tiling).rg * 2.0 - 1.0) * wave_strength;
-    }
+    vec3 X = X1point_mv.xyz - X0point_mv.xyz;
+    vec3 Y = Y1point_mv.xyz - Y0point_mv.xyz;
+    normal_mv += normalize(cross(X,Y));
 
     //Next we use a gaussian function to make the color changes smoother
     vec3 height_material = vec3(0.0,0.0,0.0);

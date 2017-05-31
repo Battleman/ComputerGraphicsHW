@@ -13,14 +13,13 @@ class Quad {
         GLuint texture_id_;             // texture ID
         GLuint texture_map_;            //normalMap for water
         GLuint texture_dudv_;            //dudvMap for water
-        float is_water_;
         GLuint image_texture_id_[3];    // image texture ID
         GLuint num_indices_;            // number of vertices to render
         float move_factor = 0.03;
 
     public:
 
-        void Init(GLuint texture, float is_water) {
+        void Init(GLuint texture) {
             // compile the shaders
             program_id_ = icg_helper::LoadShaders("quad_vshader.glsl",
                                                   "quad_fshader.glsl");
@@ -42,10 +41,6 @@ class Quad {
             glUniform3fv(La_id, ONE, glm::value_ptr(La));
             glUniform3fv(Ld_id, ONE, glm::value_ptr(Ld));
             glUniform3fv(Ls_id, ONE, glm::value_ptr(Ls));
-
-            // 0: False, 1: True
-            is_water_ = is_water;
-            glUniform1f(glGetUniformLocation(program_id_, "isWater"), is_water_);
 
             //material?
             glm::vec3 ka = glm::vec3(1.0f, 1.0f, 1.0f);
