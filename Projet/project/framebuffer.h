@@ -94,4 +94,15 @@ class FrameBuffer {
             glClearColor(1.0, 1.0, 1.0, 1.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
+
+        float* getHeight(glm::vec2 position) {
+            float* height = (float*)calloc(1,sizeof(float));
+            glReadPixels(position.x , position.y , 1 , 1 , GL_GREEN , GL_FLOAT , height);
+            return height;
+        }
+
+        float height() {return height_;}
+
+        float width() {return width_;}
+
 };
