@@ -45,8 +45,10 @@ bool cam_backward = false;
 bool cam_left = false;
 bool cam_right = false;
 vec2 mouse_anchor(0.0f);
+int terrainMode = 1;
 
 float filter = 2.0f;
+
 
 void Init(GLFWwindow* window) {
     glClearColor(1.0, 1.0, 1.0 /*white*/, 1.0 /*solid*/);
@@ -115,7 +117,7 @@ void Display() {
     framebuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        screenquad.Draw();
+        screenquad.Draw(terrainMode);
     }
     framebuffer.Unbind();
 
@@ -135,7 +137,7 @@ void Display() {
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    skybox.Draw(/*IDENTITY_MATRIX * */ projection_matrix * view_matrix );
+    skybox.Draw(projection_matrix * view_matrix );
     quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix, 0); //I is used as the model matrix
     water.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix, 0);
 }
@@ -174,6 +176,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     switch(key){
         case GLFW_KEY_ESCAPE :
             if(action == GLFW_PRESS) {glfwSetWindowShouldClose(window, GL_TRUE);}
+
+        /*########
+         * Camera
+         * #######*/
         case GLFW_KEY_W: //forward
             if(action == GLFW_PRESS) {
                 cam_forward = true;
@@ -200,6 +206,50 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 cam_right = true;
             } else if(action == GLFW_RELEASE) {
                 cam_right = false;
+            }
+            break;
+
+        /*########
+         * Terrain mode
+         * #######*/
+        case GLFW_KEY_F1: //Terrain 1
+            if(action == GLFW_PRESS){
+                terrainMode = 1;
+            }
+            break;
+        case GLFW_KEY_F2: //Terrain 2
+            if(action == GLFW_PRESS){
+                terrainMode = 2;
+            }
+            break;
+        case GLFW_KEY_F3: //Terrain 3
+            if(action == GLFW_PRESS){
+                terrainMode = 3;
+            }
+            break;
+        case GLFW_KEY_F4: //Terrain 4
+            if(action == GLFW_PRESS){
+                terrainMode = 4;
+            }
+            break;
+        case GLFW_KEY_F5: //Terrain 5
+            if(action == GLFW_PRESS){
+                terrainMode = 5;
+            }
+            break;
+        case GLFW_KEY_F6: //Terrain 6
+            if(action == GLFW_PRESS){
+                terrainMode = 6;
+            }
+            break;
+
+        /*########
+         * Misc
+         * #######*/
+        case GLFW_KEY_R: //Re-randomize the noise
+            if(action == GLFW_PRESS){
+                screenquad.Cleanup();
+                screenquad.Init(window_width, window_height);
             }
             break;
     }

@@ -126,7 +126,7 @@ class ScreenQuad {
             this->screenquad_height_ = screenquad_height;
         }
 
-        void Draw() {
+        void Draw(int mode) {
             glUseProgram(program_id_);
             glBindVertexArray(vertex_array_id_);
 
@@ -136,6 +136,8 @@ class ScreenQuad {
             glUniform1f(glGetUniformLocation(program_id_, "tex_height"),
                         this->screenquad_height_);
 
+           glUniform1i(glGetUniformLocation(program_id_, "mode"),
+                       mode);
             // draw
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

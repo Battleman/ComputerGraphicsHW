@@ -19,7 +19,6 @@ uniform int discard_pix;
 out vec4 color;
 
 void main() {
-    /*We have 2 quads : the terrain and the water. This function treats both cases*/
     vec3 light_dirn = normalize(light_dir);
     vec3 view_dirn = normalize(view_dir);
     vec3 X = vec3(dFdx(vpoint_mv));
@@ -32,8 +31,4 @@ void main() {
         discard;
     }
     color = vec4(res_color,visibility);
-
-
-
-
 }
