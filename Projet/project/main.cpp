@@ -235,6 +235,17 @@ void UpdateCamera() {
             cam_look = cam_look+translate_vector;
             free(height);
         }
+        if(!cam_right && !cam_backward && !cam_forward && !cam_left) {
+            height = (float*)calloc(1,sizeof(float));
+            previous_pos = cam_pos;
+            vec2 position = vec2(((cam_pos.x/10.0f)+1.0f)*framebuffer.width(),((cam_pos.y/10.0f)+1.0f)*framebuffer.height())*0.5f;
+            glReadPixels(position.x , position.y , 1 , 1 , GL_RED , GL_FLOAT , height);
+            cam_pos[2] = glm::max((*height +0.7f),0.2f);
+            //std::cout << "Camera position: "<< cam_pos[0] << " " << cam_pos[1] << " " << cam_pos[2] << std::endl;
+            translate_vector = cam_pos-previous_pos;
+            cam_look = cam_look+translate_vector;
+            free(height);
+        }
         break;
 
     case 3:
