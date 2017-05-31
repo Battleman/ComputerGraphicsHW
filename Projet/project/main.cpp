@@ -13,11 +13,13 @@
 #include "screenquad/screenquad.h"
 #include "quad/quad.h"
 #include "water/water.h"
+#include "clouds/cloud.h"
 
 Skybox skybox;
 
 Quad quad;
 Water water;
+Cloud clouds;
 
 int window_width = 800;
 int window_height = 600;
@@ -135,9 +137,20 @@ void Init(GLFWwindow* window) {
     GLuint waterbuffer_texture_id = waterbuffer.Init(window_width, window_height, true);
 
     screenquad.Init(window_width, window_height);
-    quad.Init(framebuffer_texture_id, 0.0, vec2(0,0));
+
+    quad.Init(framebuffer_texture_id);
+    clouds.Init(framebuffer_texture_id);
     water.Init(waterbuffer_texture_id);
     skybox.Init();
+
+    //Perlin Noise
+    framebuffer.Clear();
+    framebuffer.Bind();
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        screenquad.Draw();
+    }
+    framebuffer.Unbind();
 }
 
 void RecomputeReflectionViewMat() {
@@ -268,21 +281,12 @@ void UpdateCamera() {
 
 }
 void Display() {
-    //Perlin Noise
-    framebuffer.Clear();
-    framebuffer.Bind();
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        screenquad.Draw();
-
-    }
-    framebuffer.Unbind();
-
     framebuffer.Bind();
     {
         UpdateCamera();
     }
     framebuffer.Unbind();
+
     RecomputeReflectionViewMat();
 
     //Draw Reflection
@@ -302,6 +306,7 @@ void Display() {
     skybox.Draw(/*IDENTITY_MATRIX * */ projection_matrix * view_matrix );
     quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix, 0); //I is used as the model matrix
     water.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix, 0);
+    clouds.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix);
 }
 
 
