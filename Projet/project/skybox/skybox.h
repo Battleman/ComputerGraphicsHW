@@ -92,7 +92,7 @@ static const glm::vec2 CubeUVs[] =
     glm::vec2(1.0, 0.7499)
 };
 
-class Cube {
+class Skybox {
 
     private:
         GLuint vertex_array_id_;        // vertex array object

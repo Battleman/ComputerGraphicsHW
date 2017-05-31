@@ -13,7 +13,6 @@ class Quad {
         GLuint texture_id_;             // texture ID
         GLuint texture_map_;            //normalMap for water
         GLuint texture_dudv_;            //dudvMap for water
-        float is_water_;
         GLuint image_texture_id_[3];    // image texture ID
         GLuint num_indices_;            // number of vertices to render
         float move_factor = 0.03;
@@ -42,10 +41,6 @@ class Quad {
             glUniform3fv(La_id, ONE, glm::value_ptr(La));
             glUniform3fv(Ld_id, ONE, glm::value_ptr(Ld));
             glUniform3fv(Ls_id, ONE, glm::value_ptr(Ls));
-
-            // 0: False, 1: True
-            is_water_ = is_water;
-            glUniform1f(glGetUniformLocation(program_id_, "isWater"), is_water_);
 
             //material?
             glm::vec3 ka = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -77,65 +72,6 @@ class Quad {
 
                 GLuint grim_dim_id = glGetUniformLocation(program_id_, "triangles_number");
                 glUniform1i(grim_dim_id, grid_dim);
-
-                // the given code below are the vertices for a simple quad.
-                // your grid should have the same dimension as that quad, i.e.,
-                // reach from [-1, -1] to [1, 1].
-
-                //generate all the vertices for the grid
-                //some vertices have to be almost handwritten to avoid having
-                //unwanted edges on the board. In the border the triangles are
-                //half the size because the grid must be a square, so their vertices
-                //are outside the second loop.
-
-
-                /*
-                int index = 0;
-                vertices.push_back(-1.0f);
-                vertices.push_back(-1.0f);
-                indices.push_back(index++);
-                float l = 2.0f/(float)grid_dim;
-                for(int i = 0; i<grid_dim; i++) {
-                    if(i%2 != 1){
-                        for(int j = 0; j<grid_dim; j++) {
-                            vertices.push_back((((float)j)*l)-1.0f);
-                            vertices.push_back((((float)(i+1))*l)-1.0f);
-                            indices.push_back(index++);
-                            vertices.push_back((((float)j+0.5f)*l)-1.0f);
-                            vertices.push_back((((float)i)*l)-1.0f);
-                            indices.push_back(index++);
-                        }
-                        vertices.push_back((((float)grid_dim)*l)-1.0f);
-                        vertices.push_back((((float)(i+1))*l)-1.0f);
-                        indices.push_back(index++);
-                        vertices.push_back((((float)grid_dim)*l)-1.0f);
-                        vertices.push_back((((float)i)*l)-1.0f);
-                        indices.push_back(index++);
-                        vertices.push_back((((float)grid_dim)*l)-1.0f);
-                        vertices.push_back((((float)(i+1))*l)-1.0f);
-                        indices.push_back(index++);
-                    } else {
-                        vertices.push_back((((float)grid_dim)*l)-1.0f);
-                        vertices.push_back((((float)(i+1))*l)-1.0f);
-                        indices.push_back(index++);
-                        vertices.push_back((((float)grid_dim)*l)-1.0f);
-                        vertices.push_back((((float)(i))*l)-1.0f);
-                        indices.push_back(index++);
-                        for(int j = 0; j<grid_dim; j++) {
-                            vertices.push_back(((-((float)j+0.5f))*l)+1.0f);
-                            vertices.push_back((((float)(i+1))*l)-1.0f);
-                            indices.push_back(index++);
-                            vertices.push_back(((-((float)j+1.0f))*l)+1.0f);
-                            vertices.push_back((((float)i)*l)-1.0f);
-                            indices.push_back(index++);
-                        }
-                        vertices.push_back(-1.0f);
-                        vertices.push_back((((float)i+1)*l)-1.0f);
-                        indices.push_back(index++);
-                    }
-
-                }
-                */
 
                 float grid_start = (-grid_size/2.0)+offset.x;
                 for(int i = 0; i < grid_dim; i++) {
@@ -199,9 +135,9 @@ class Quad {
 
 
             GLchar* texture_uniform[3];
-            texture_uniform[0] = "tex2";
-            texture_uniform[1] = "tex3";
-            texture_uniform[2] = "tex4";
+            texture_uniform[0] = (GLchar*)"tex2";
+            texture_uniform[1] = (GLchar*)"tex3";
+            texture_uniform[2] = (GLchar*)"tex4";
 
             GLuint texture_ids[3];
 
@@ -234,6 +170,7 @@ class Quad {
             }
 
             {
+                /*Loads and treats normal map*/
                 int width;
                 int height;
                 int nb_component;
@@ -269,6 +206,7 @@ class Quad {
             }
 
             {
+                /*Treats noise on water*/
                 int width;
                 int height;
                 int nb_component;
@@ -364,7 +302,7 @@ class Quad {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             // draw
-            //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
             glDrawElements(GL_TRIANGLE_STRIP, num_indices_, GL_UNSIGNED_INT, 0);
 
             glDisable(GL_BLEND);

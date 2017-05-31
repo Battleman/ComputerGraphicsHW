@@ -7,11 +7,11 @@ out vec3 color;
 
 uniform float tex_width;
 uniform float tex_height;
-//uniform float permutation[256];
 uniform int[512] p;
 
 int repeat = 256;
 
+/**Those are intermediate functions for Perlin Noise*/
 int inc(int num) {
     num++;
     if(repeat > 0) num = int(mod(num, repeat));
@@ -41,6 +41,7 @@ float grad(int hash, float x, float y) {
     return 0.0f;
 }
 
+/**Perlin Noise*/
 float Perlin(float x, float y) {
     if(repeat > 0) {
         x = mod(x, repeat);
@@ -73,6 +74,7 @@ float Perlin(float x, float y) {
     return noise;
 }
 
+/*fractal Brownian Motion*/
 float fBm(float x, float y, float H, float lacunarity, int octaves) {
     float value = 0.0;
     /* inner loop of fractal construction */
@@ -83,29 +85,23 @@ float fBm(float x, float y, float H, float lacunarity, int octaves) {
     }
     return value;
 }
-
-float OctavePerlin(float x, float y, int octaves, float persistence) {
-    float total = 0;
-    float frequency = 1;
-    float amplitude = 1;
-    float maxValue = 0;  // Used for normalizing result to 0.0 - 1.0
-    for(int i=0;i<octaves;i++) {
-        total += Perlin(x * frequency, y * frequency) * amplitude;
-
-        maxValue += amplitude;
-
-        amplitude *= persistence;
-        frequency *= 2;
+/**Similar : multifractal*/
+float multifractal(float x, float y, float H, float lacunarity, int octaves, float offset) {
+    float value = 1.0;
+    for (int i = 0; i < octaves; i++) {
+        value *= (1-abs(Perlin(x, y))+offset) * pow(lacunarity, -H*i); //value1
+        x *= lacunarity;
+        y *= lacunarity;
     }
-
-
-
-    return total/maxValue;
+    return value;
 }
 
+
+
 void main() {
-//    float color1 = OctavePerlin(4*uv.x, 4*uv.y, 10, 0.3);
-    float color1 = fBm(10*uv.x, 10*uv.y, 1.2, 3, 10) - 0.25;
-    color = vec3(color1);
+    /*Heightmap computed with hybrid of fBm and multifractal*/
+    float color_fBm = fBm(10*uv.x, 10*uv.y, 1.2, 6, 10);
+    float colorFractal = multifractal(5*uv.x, 5*uv.y, 2.0f, 1.1f, 10, 1.7f);
+    color = vec3((color_fBm+colorFractal)/1.2 - 1.3);
 }
 
