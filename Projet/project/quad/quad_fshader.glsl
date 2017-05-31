@@ -6,6 +6,7 @@ in vec4 vpoint_mv;
 in vec3 light_dir, view_dir;
 in float height;
 in float visibility;
+in vec3 normals_mv;
 
 
 uniform vec3 La, Ld, Ls;
@@ -21,6 +22,7 @@ void main() {
     vec3 X = vec3(dFdx(vpoint_mv));
     vec3 Y = vec3(dFdy(vpoint_mv));
     vec3 normal_mv = normalize(cross(X,Y));
+    normal_mv = normals_mv;
 
     vec3 res_color = vec3(0.0f);
     res_color += (material*max(0.0f,dot(normal_mv,light_dirn))*Ld);
