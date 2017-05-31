@@ -5,15 +5,12 @@ in vec3 material;
 in vec4 vpoint_mv;
 in vec3 light_dir, view_dir;
 in float height;
-in vec3 water;
-in vec2 dudv;
 in float visibility;
 
 
 uniform vec3 La, Ld, Ls;
 uniform float alpha;
 uniform sampler2D tex;
-uniform sampler2D tex1;
 uniform int discard_pix;
 
 out vec4 color;
@@ -31,4 +28,5 @@ void main() {
         discard;
     }
     color = vec4(res_color,visibility);
+
 }
