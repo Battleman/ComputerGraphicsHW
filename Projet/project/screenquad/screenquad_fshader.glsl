@@ -107,6 +107,5 @@ void main() {
 //    float color1 = OctavePerlin(4*uv.x, 4*uv.y, 10, 0.3);
     float color1 = fBm(10*uv.x, 10*uv.y, 1.2, 3, 10) - 0.25;
     color = vec3(color1);
-
 }
 

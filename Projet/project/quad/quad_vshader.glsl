@@ -41,7 +41,6 @@ void main() {
 
     if(isWater == 0) {
         height = texture(tex,uv).r+0.5;
-
         vpoint_mv = MV * vec4(position.x,position.y,height, 1.0);
         gl_Position = projection * vpoint_mv;
         light_dir = normalize(light_pos-vec3(vpoint_mv));

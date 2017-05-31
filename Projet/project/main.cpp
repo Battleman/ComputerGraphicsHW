@@ -44,9 +44,9 @@ double water_height = 0.0;
 vec4 r_plane(0.0,0.0,1.0,0.0); //TODO paramétrer la hauteur de l'eau
 vec4 initial_rplane(0.0,0.0,1.0,0);
 vec3 translate_vector_mir(0.0f, 0.0f, 4.0f);
-vec3 cam_pos(5.0f, 2.0f, 10.0f);
-vec3 cam_pos_mir(2.0f, 2.0f, -2.9f);
-vec3 cam_look(0.0f, 0.0f, 0.0f);
+vec3 cam_pos(0.0f, 0.0f, 5.0f);
+//vec3 cam_pos_mir(2.0f, 2.0f, -2.9f);
+vec3 cam_look(0.0f, 1.0f, 5.0f);
 vec3 cam_up(0.0f, 0.0f, 1.0f);
 bool cam_forward = false;
 bool cam_backward = false;
@@ -56,10 +56,79 @@ vec2 mouse_anchor(0.0f);
 
 double zoom;
 float filter = 2.0f;
+uint8 camera_mode = 1;
+float bezierT = 0.0f;
+int bezierCurve = 0;
+vec3* bezierPoints;
+float speed = 0.0;
+
+vec3 Bezier(float t, vec3 p1, vec3 p2, vec3 p3, vec3 p4) {
+    float tt = t*t;
+    float ttt = tt*t;
+    float u = 1 - t;
+    float uu = u*u;
+    float uuu = uu*u;
+    vec3 res = (uuu*p1) + (3*uu*t*p2) + (3*u*tt*p3) + (ttt*p4);
+    return res;
+}
+
+vec3* AframeConstruction(vec3 start, vec3 left, vec3 end) {
+    vec3 leftBranch = left-start;
+    vec3 top = left+leftBranch;
+    vec3 rightBranch = (top-end)/2.0f;
+    vec3 right = end+rightBranch;
+    vec3 mid = (left+right)/2.0f;
+    vec3* res = (vec3*)calloc(3,sizeof(vec3));
+    res[0] = mid;
+    res[1] = right;
+    res[2] = end;
+    return &res[0];
+}
 
 void Init(GLFWwindow* window) {
     glClearColor(1.0, 1.0, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
+
+    vec3* bezierNexts = (vec3*)calloc(20,sizeof(vec3));
+    bezierNexts[0] = vec3(10.0,5.0,6.0);
+    bezierNexts[1] = vec3(0.0,2.0,6.0);
+    bezierNexts[2] = vec3(-10.0,0.0,6.0);
+    bezierNexts[3] = vec3(-7.0,-4.0,7.0);
+    bezierNexts[4] = vec3(-5.0,-8.0,1.5);
+    bezierNexts[5] = vec3(-3.0,-6.0,2.0);
+    bezierNexts[6] = vec3(-3.0,-4.0,3.0);
+    bezierNexts[7] = vec3(-5.0,-1.0,4.0);
+    bezierNexts[8] = vec3(-4.0,5.0,5.0);
+    bezierNexts[9] = vec3(-7.0,9.0,6.0);
+    bezierNexts[10] = vec3(-10.0,11.0,7.0);
+    bezierNexts[11] = vec3(-8.0,12.0,6.0);
+    bezierNexts[12] = vec3(-5.0,12.0,3.0);
+    bezierNexts[13] = vec3(0.0,11.0,2.0);
+    bezierNexts[14] = vec3(6.0,10.0,3.0);
+    bezierNexts[15] = vec3(10.0,7.0,4.0);
+    bezierNexts[16] = vec3(11.0,3.0,5.0);
+    bezierNexts[17] = vec3(11.0,-1.0,2.0);
+    bezierNexts[18] = vec3(7.0,-6.0,4.0);
+    bezierNexts[19] = vec3(4.0,-8.0,6.0);
+
+
+    bezierPoints = (vec3*)calloc(60,sizeof(vec3)); //0: start/end, 1: control1, 2: control2
+    bezierPoints[0] = vec3(0.0f,0.0f,6.0f);
+    bezierPoints[1] = vec3(0.0f,1.0f,6.0f);
+    bezierPoints[2] = vec3(1.0f,1.0f,6.0f);
+
+    for(int i = 3; i < 60; i+= 3) {
+        //vec3 next = vec3(7*sin(i*i/8), 5*cos(i/4.0), ((3*i)%7)+1.5);
+        vec3 next = bezierNexts[i/3];
+        vec3* temp = AframeConstruction(bezierPoints[i-2],bezierPoints[i-1],next);
+        bezierPoints[i] = temp[0];
+        bezierPoints[i+1] = temp[1];
+        bezierPoints[i+2] = temp[2];
+        free(temp);
+    }
+
+
+
 
     // setup view and projection matrices
     //view_matrix_mir = lookAt(cam_pos_mir, cam_look, cam_up);
@@ -97,7 +166,7 @@ void Init(GLFWwindow* window) {
     GLuint waterbuffer_texture_id = waterbuffer.Init(window_width, window_height, true);
 
     screenquad.Init(window_width, window_height);
-    quad.Init(framebuffer_texture_id, 0.0);
+    quad.Init(framebuffer_texture_id, 0.0, vec2(0,0));
     water.Init(waterbuffer_texture_id);
     cube.Init();
 
@@ -107,7 +176,7 @@ void Init(GLFWwindow* window) {
 void RecomputeReflectionViewMat() {
     r_plane = initial_rplane*trackball_matrix;
     vec3 r_normal = normalize(vec3(r_plane.x,r_plane.y,r_plane.z));
-    cam_pos_mir = cam_pos - 2*dot(cam_pos,r_normal)*r_normal;
+    //cam_pos_mir = cam_pos - 2*dot(cam_pos,r_normal)*r_normal;
     //reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
     //                    vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
     //                    vec4( -2*r_plane.x*r_plane.z, -2*r_plane.y*r_plane.z, 1.0-2*r_plane.z*r_plane.z, 0.0),
@@ -125,43 +194,137 @@ void RecomputeReflectionViewMat() {
     //reflect_mat[0][0] = - reflect_mat[0][0];
 }
 
+
+
 void UpdateCamera() {
     vec3 translate_vector;
-    if(cam_forward) {
-        translate_vector = normalize(cam_look-cam_pos)/3.0f;
-        cam_look = cam_look+translate_vector;
-        cam_pos = cam_pos+translate_vector;
+    vec3 previous_pos = cam_pos;
+    float* height;
+    if(cam_forward || cam_backward || cam_left || cam_right){
+        speed = speed >= 0.2? 0.2: speed+0.01;
+    } else {
+        speed = 0;
     }
-    if(cam_backward) {
-        translate_vector = normalize(cam_look-cam_pos)/3.0f;
-        cam_look = cam_look-translate_vector;
-        cam_pos = cam_pos-translate_vector;
-    }
-    if(cam_left) {
-        translate_vector = normalize(cross(cam_look-cam_pos,cam_up))/3.0f;
-        cam_look = cam_look-translate_vector;
-        cam_pos = cam_pos-translate_vector;
-    }
-    if(cam_right) {
-        translate_vector = normalize(cross(cam_look-cam_pos,cam_up))/3.0f;
-        cam_look = cam_look+translate_vector;
-        cam_pos = cam_pos+translate_vector;
+    switch (camera_mode) {
+    case 0: //free cam
+        if(cam_forward) {
+            translate_vector = normalize(cam_look-cam_pos)*speed*2.0f;
+            cam_look = cam_look+translate_vector;
+            cam_pos = cam_pos+translate_vector;
+        }
+        if(cam_backward) {
+            translate_vector = normalize(cam_look-cam_pos)*speed*2.0f;
+            cam_look = cam_look-translate_vector;
+            cam_pos = cam_pos-translate_vector;
+        }
+        if(cam_left) {
+            translate_vector = normalize(cross(cam_look-cam_pos,cam_up))*speed*2.0f;
+            cam_look = cam_look-translate_vector;
+            cam_pos = cam_pos-translate_vector;
+        }
+        if(cam_right) {
+            translate_vector = normalize(cross(cam_look-cam_pos,cam_up))*speed*2.0f;
+            cam_look = cam_look+translate_vector;
+            cam_pos = cam_pos+translate_vector;
+        }
+        break;
+    case 1: //ground cam
+        if(cam_forward) {
+            height = (float*)calloc(1,sizeof(float));
+            translate_vector = normalize(vec3(cam_look.x,cam_look.y,1)-vec3(cam_pos.x,cam_pos.y,1))*speed;
+            cam_pos = cam_pos+translate_vector;
+            //height = framebuffer.getHeight( vec2((cam_pos.x/1.0f)+10.f,(cam_pos.y/1.0f)+10.0f)*0.05f);
+            vec2 position = vec2(((cam_pos.x/10.0f)+1.0f)*framebuffer.width(),((cam_pos.y/10.0f)+1.0f)*framebuffer.height())*0.5f;
+            glReadPixels(position.x , position.y , 1 , 1 , GL_RED , GL_FLOAT , height);
+            cam_pos[2] = glm::max((*height +0.7f),0.2f);
+            std::cout << "Camera position: "<< cam_pos[0] << " " << cam_pos[1] << " " << cam_pos[2] << std::endl;
+            translate_vector = cam_pos-previous_pos;
+            cam_look = cam_look+translate_vector;
+            free(height);
+        }
+        if(cam_backward) {
+            height = (float*)calloc(1,sizeof(float));
+            previous_pos = cam_pos;
+            translate_vector = -normalize(vec3(cam_look.x,cam_look.y,1)-vec3(cam_pos.x,cam_pos.y,1))*speed;
+            cam_pos = cam_pos+translate_vector;
+            //height = framebuffer.getHeight( vec2((cam_pos.x/1.0f)+10.f,(cam_pos.y/1.0f)+10.0f)*0.05f);
+            vec2 position = vec2(((cam_pos.x/10.0f)+1.0f)*framebuffer.width(),((cam_pos.y/10.0f)+1.0f)*framebuffer.height())*0.5f;
+            glReadPixels(position.x , position.y , 1 , 1 , GL_RED , GL_FLOAT , height);
+            cam_pos[2] = glm::max((*height +0.7f),0.2f);
+            std::cout << "Camera position: "<< cam_pos[0] << " " << cam_pos[1] << " " << cam_pos[2] << std::endl;
+            translate_vector = cam_pos-previous_pos;
+            cam_look = cam_look+translate_vector;
+            free(height);
+        }
+        if(cam_left) {
+            height = (float*)calloc(1,sizeof(float));
+            previous_pos = cam_pos;
+            translate_vector = -normalize(cross(vec3(cam_look.x,cam_look.y,1)-vec3(cam_pos.x,cam_pos.y,1),cam_up))*speed;
+            cam_pos = cam_pos+translate_vector;
+            //height = framebuffer.getHeight( vec2((cam_pos.x/1.0f)+10.f,(cam_pos.y/1.0f)+10.0f)*0.05f);
+            vec2 position = vec2(((cam_pos.x/10.0f)+1.0f)*framebuffer.width(),((cam_pos.y/10.0f)+1.0f)*framebuffer.height())*0.5f;
+            glReadPixels(position.x , position.y , 1 , 1 , GL_RED , GL_FLOAT , height);
+            cam_pos[2] = glm::max((*height +0.7f),0.2f);
+            std::cout << "Camera position: "<< cam_pos[0] << " " << cam_pos[1] << " " << cam_pos[2] << std::endl;
+            translate_vector = cam_pos-previous_pos;
+            cam_look = cam_look+translate_vector;
+            free(height);
+        }
+        if(cam_right) {
+            height = (float*)calloc(1,sizeof(float));
+            previous_pos = cam_pos;
+            translate_vector = normalize(cross(vec3(cam_look.x,cam_look.y,1)-vec3(cam_pos.x,cam_pos.y,1),cam_up))*speed;
+            cam_pos = cam_pos+translate_vector;
+            //height = framebuffer.getHeight( vec2((cam_pos.x/1.0f)+10.f,(cam_pos.y/1.0f)+10.0f)*0.05f);
+            vec2 position = vec2(((cam_pos.x/10.0f)+1.0f)*framebuffer.width(),((cam_pos.y/10.0f)+1.0f)*framebuffer.height())*0.5f;
+            glReadPixels(position.x , position.y , 1 , 1 , GL_RED , GL_FLOAT , height);
+            cam_pos[2] = glm::max((*height +0.7f),0.2f);
+            std::cout << "Camera position: "<< cam_pos[0] << " " << cam_pos[1] << " " << cam_pos[2] << std::endl;
+            translate_vector = cam_pos-previous_pos;
+            cam_look = cam_look+translate_vector;
+            free(height);
+        }
+        break;
+
+    case 3:
+        bezierT += 0.01;
+        if(bezierT >= 1.0f) {
+            bezierCurve++;
+            bezierT = 0.0;
+            std::cout << "Change of curve" << std::endl;
+        }
+        if(bezierCurve < 19){
+            cam_pos = Bezier(bezierT,bezierPoints[bezierCurve*3],bezierPoints[(bezierCurve*3)+1],bezierPoints[(bezierCurve*3)+2],bezierPoints[(bezierCurve*3)+3]);
+            //cam_look = Bezier(bezierT,bezierPoints[(bezierCurve+1)*3],bezierPoints[(bezierCurve+1)+1],bezierPoints[(bezierCurve+1)+2],bezierPoints[(bezierCurve+1)+3]);
+            //std::cout << cam_pos[0] << " " << cam_pos[1] << " " << cam_pos[2] <<std::endl;
+        }
+        break;
+    default:
+        break;
     }
     view_matrix = lookAt(cam_pos, cam_look, cam_up);
+
 }
 
 void Display() {
     // render to framebuffer
-    UpdateCamera();
+
+
     //Perlin Noise
     framebuffer.Clear();
     framebuffer.Bind();
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         screenquad.Draw();
+
     }
     framebuffer.Unbind();
 
+    framebuffer.Bind();
+    {
+        UpdateCamera();
+    }
+    framebuffer.Unbind();
     RecomputeReflectionViewMat();
 
     //Draw Reflection
@@ -207,8 +370,8 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
     framebuffer.Init(window_width, window_height, true);
     screenquad.UpdateSize(window_width, window_height);
 
-//    waterbuffer.Cleanup();
-//    waterbuffer.Init(window_width, window_height);
+    waterbuffer.Cleanup();
+    waterbuffer.Init(window_width, window_height);
 }
 
 void ErrorCallback(int error, const char* description) {
@@ -218,6 +381,39 @@ void ErrorCallback(int error, const char* description) {
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+        camera_mode = 0;
+        std::cout << "Switched to free camera mode" << std::endl;
+        std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
+        bezierT = 0.0;
+        bezierCurve = 0;
+        trackball_matrix = IDENTITY_MATRIX;
+    }
+    if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+        camera_mode = 1;
+        std::cout << "Switched to ground camera mode" << std::endl;
+        std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
+        trackball_matrix = IDENTITY_MATRIX;
+    }
+    if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+        camera_mode = 2;
+        std::cout << "Switched to buttons-only camera mode" << std::endl;
+        std::cout << "Controls: wasd to move the camera, q to look up and e to look down" << std::endl;
+        trackball_matrix = IDENTITY_MATRIX;
+    }
+    if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+        camera_mode = 3;
+        std::cout << "Switched to automatic camera mode" << std::endl;
+        std::cout << "Controls: none" << std::endl;
+        cam_look = vec3(0.0,0.0,0.0);
+        trackball_matrix = IDENTITY_MATRIX;
+    }
+    if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
+        camera_mode = 4;
+        std::cout << "Switched to trackball mode" << std::endl;
+        std::cout << "Controls: left click and drag to move the trackball" << std::endl;
+        trackball_matrix = IDENTITY_MATRIX;
     }
     if (key == GLFW_KEY_W) {
         if(action == GLFW_PRESS) {
@@ -262,7 +458,7 @@ vec2 TransformScreenCoords(GLFWwindow* window, int x, int y) {
 }
 
 void MouseButton(GLFWwindow* window, int button, int action, int mod) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && camera_mode == 4) {
         double x_i, y_i;
         glfwGetCursorPos(window, &x_i, &y_i);
         vec2 p = TransformScreenCoords(window, x_i, y_i);
@@ -275,7 +471,7 @@ void MouseButton(GLFWwindow* window, int button, int action, int mod) {
 //        glfwGetCursorPos(window, &x_i, &y_i);
 //        zoom = TransformScreenCoords(window, x_i, y_i)[1];
 //    }
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && (camera_mode == 0 || camera_mode == 1)) {
         double x_i, y_i;
         glfwGetCursorPos(window, &x_i, &y_i);
         mouse_anchor = TransformScreenCoords(window, x_i, y_i);
@@ -283,7 +479,8 @@ void MouseButton(GLFWwindow* window, int button, int action, int mod) {
 }
 
 void MousePos(GLFWwindow* window, double x, double y) {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && camera_mode == 4) {
         vec2 p = TransformScreenCoords(window, x, y);
         // TODO 3: Calculate 'trackball_matrix' given the return value of
         // trackball.Drag(...) and the value stored in 'old_trackball_matrix'.
@@ -312,7 +509,7 @@ void MousePos(GLFWwindow* window, double x, double y) {
 //        //I'd find it more intuitive to zoom out and in by scaling the object, why don't we do that?
 
 //    }
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && (camera_mode == 0 || camera_mode == 1)) {
 
         //std::cout << mouse_anchor.y << std::endl;
 
