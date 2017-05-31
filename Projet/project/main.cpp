@@ -79,6 +79,17 @@ vec3* AframeConstruction(vec3 start, vec3 left, vec3 end) {
     return &res[0];
 }
 
+void draw_perlin(){
+    //Perlin Noise
+    framebuffer.Clear();
+    framebuffer.Bind();
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        screenquad.Draw(terrainMode);
+    }
+    framebuffer.Unbind();
+}
+
 void Init(GLFWwindow* window) {
     glClearColor(1.0, 1.0, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
@@ -143,15 +154,7 @@ void Init(GLFWwindow* window) {
     clouds.Init(framebuffer_texture_id);
     water.Init(waterbuffer_texture_id);
     skybox.Init();
-
-    //Perlin Noise
-    framebuffer.Clear();
-    framebuffer.Bind();
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        screenquad.Draw();
-    }
-    framebuffer.Unbind();
+    draw_perlin();
 }
 
 void RecomputeReflectionViewMat() {
@@ -421,6 +424,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             if(action == GLFW_PRESS){
                 screenquad.Cleanup();
                 screenquad.Init(window_width, window_height);
+                draw_perlin();
             }
             break;
     case GLFW_KEY_1 :
@@ -463,6 +467,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             //trackball_matrix = IDENTITY_MATRIX;
         }
         break;
+    }
+    if((key == GLFW_KEY_F1 || key == GLFW_KEY_F2 || key == GLFW_KEY_F3 ||
+        key == GLFW_KEY_F4 || key == GLFW_KEY_F5 || key == GLFW_KEY_F6) &&
+        action == GLFW_PRESS) {
+        draw_perlin();
     }
 }
 

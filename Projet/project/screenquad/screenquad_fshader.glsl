@@ -100,29 +100,34 @@ float multifractal(float x, float y, float H, float lacunarity, int octaves, flo
 
 void main() {
     /*Heightmap computed with hybrid of fBm and multifractal*/
-    float color_fBm;
-    float colorFractal;
+    float cFBM;
+    float cFract;
 
-    if(mode == 1 || mode == 2){
-        color_fBm = fBm(10*uv.x, 10*uv.y, 1.3, 6, 10);
-        colorFractal = multifractal(5*uv.x, 5*uv.y, 1.2f, 1.3f, 6, 1.6f);
-    } else {
-
-        color_fBm = fBm(7*uv.x, 7*uv.y, 1.2, 7, 15);
-        colorFractal = multifractal(2*uv.x, 2*uv.y, 0.4f, 1.5f, 4, 0.9f);
-    }
     if(mode == 2){
-        color = vec3(color_fBm);
-    } else if(mode == 3) {
-        color = vec3(colorFractal);
-    } else if(mode == 4){
-        color = vec3(color_fBm);
-    } else if(mode == 5){
-        color = vec3((color_fBm + colorFractal)/1.3-2.8);
-    } else if(mode == 6){
-        color = vec3(colorFractal/1.5-1.9);
-    } else { //default ≃ 1
-        color = vec3((color_fBm+colorFractal)/1.2 - 1.3);
+        cFBM = fBm(10*uv.x, 10*uv.y, 1.3, 6, 10);
+        color = vec3(cFBM);
+    }
+    else if(mode == 3) {
+        cFract = multifractal(5*uv.x, 5*uv.y, 1.2f, 1.3f, 6, 1.6f);
+        color = vec3(cFract-1.5);
+    }
+    else if(mode == 4){
+        cFBM = fBm(7*uv.x, 7*uv.y, 1.2, 2, 30);
+        color = vec3(cFBM);
+    }
+    else if(mode == 5){
+        cFract = multifractal(2*uv.x, 2*uv.y, 0.4f, 1.5f, 12, 0.9f);
+        cFract = fBm(7*uv.x, 7*uv.y, 1.2, 7, 15);
+        color = vec3((cFract + cFract)/1.3);
+    }
+    else if(mode == 6){
+        cFract = multifractal(3*uv.x, 3*uv.y, 0.67f, 1.26f, 10, 1.3f);
+        color = vec3(cFract - 1.5);
+    }
+    else { //default
+        cFBM = fBm(10*uv.x, 10*uv.y, 1.2, 7, 15);
+        cFract = multifractal(10*uv.x, 10*uv.y, 1.2f, 1.5f, 4, 0.9f);
+        color = vec3((cFBM+cFract) - 0.5);
     }
 
 }

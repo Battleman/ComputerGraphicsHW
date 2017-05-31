@@ -2,7 +2,6 @@
 #include "icg_helper.h"
 #include <time.h>
 #include <stdlib.h>
-//#define DEBUG_SEED 116
 
 class ScreenQuad {
 
@@ -49,12 +48,8 @@ class ScreenQuad {
 
             glUseProgram(program_id_);
 
-            /*define seed (if we need a fixed one for debugging purpose)*/
-            #ifdef DEBUG_SEED
-                srand(DEBUG_SEED);
-            #else
-                srand(time(NULL));
-            #endif
+
+             srand(time(NULL)); //set random seed
             /*Create new and bigger permutation table at random*/
             for(int x=0;x<512;x++) {
                 int random = rand() % 256;
