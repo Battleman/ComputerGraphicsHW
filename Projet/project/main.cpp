@@ -174,7 +174,7 @@ void UpdateCamera() {
     vec3 translate_vector;
     vec3 previous_pos = cam_pos;
     float* height;
-    if(cam_forward || cam_backward || cam_left || cam_right){
+    if(cam_forward || cam_backward || cam_left || cam_right || cam_downward || cam_upward){
         speed = speed >= 0.1? 0.1: speed+0.001;
     } else {
         speed = 0;
@@ -286,12 +286,22 @@ void UpdateCamera() {
             cam_look = cam_look+translate_vector;
         }
         if(cam_upward) {
+            previous_pos = cam_look;
             translate_vector = normalize(cam_up)*speed*2.0f;
-            cam_look = cam_look-translate_vector;
+            cam_look = cam_look+translate_vector;
+            if(normalize(cam_look-cam_pos)[2] > 0.95) {
+                cam_look = previous_pos;
+                speed = 0;
+            }
         }
         if(cam_downward) {
+            previous_pos = cam_look;
             translate_vector = -normalize(cam_up)*speed*2.0f;
-            cam_look = cam_look-translate_vector;
+            cam_look = cam_look+translate_vector;
+            if(normalize(cam_look-cam_pos)[2] < -0.95) {
+                cam_look = previous_pos;
+                speed = 0;
+            }
         }
         break;
     case 3:
@@ -409,6 +419,20 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 cam_right = true;
             } else if(action == GLFW_RELEASE) {
                 cam_right = false;
+            }
+            break;
+        case GLFW_KEY_Q: //up
+            if(action == GLFW_PRESS) {
+                cam_upward = true;
+            } else if(action == GLFW_RELEASE) {
+            cam_upward = false;
+            }
+            break;
+        case GLFW_KEY_E: //down
+            if(action == GLFW_PRESS) {
+                cam_downward = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_downward = false;
             }
             break;
 
