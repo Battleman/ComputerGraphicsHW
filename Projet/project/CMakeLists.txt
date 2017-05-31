@@ -21,7 +21,9 @@ file(GLOB TEXTURES
     quad/SandTexture.jpg
     quad/ForestTexture.jpg
     quad/normalMap.png
-    quad/waterDUDV.png)
+    quad/waterDUDV.png
+
+    clouds/cloud.jpg)
 copy_files_once(${TEXTURES})
 
 # list all the files you want to copy everytime
@@ -30,7 +32,8 @@ file(GLOB SHADERS
     screenquad/*.glsl
     skybox/*.glsl
     quad/*.glsl
-    water/*.glsl)
+    water/*.glsl
+    clouds/*.glsl)
 deploy_shaders_to_build_dir(${SHADERS})
 
 add_executable(${EXERCISENAME} ${SOURCES} ${HEADERS} ${SHADERS})
