@@ -8,7 +8,7 @@ out vec3 color;
 uniform float tex_width;
 uniform float tex_height;
 uniform int[512] p;
-
+uniform int mode;
 int repeat = 256;
 
 /**Those are intermediate functions for Perlin Noise*/
@@ -100,8 +100,35 @@ float multifractal(float x, float y, float H, float lacunarity, int octaves, flo
 
 void main() {
     /*Heightmap computed with hybrid of fBm and multifractal*/
-    float color_fBm = fBm(10*uv.x, 10*uv.y, 1.2, 6, 10);
-    float colorFractal = multifractal(5*uv.x, 5*uv.y, 2.0f, 1.1f, 10, 1.7f);
-    color = vec3((color_fBm+colorFractal)/1.2 - 1.3);
+    float cFBM;
+    float cFract;
+
+    if(mode == 2){
+        cFBM = fBm(10*uv.x, 10*uv.y, 1.3, 6, 10);
+        color = vec3(cFBM);
+    }
+    else if(mode == 3) {
+        cFract = multifractal(5*uv.x, 5*uv.y, 1.2f, 1.3f, 6, 1.6f);
+        color = vec3(cFract-1.5);
+    }
+    else if(mode == 4){
+        cFBM = fBm(7*uv.x, 7*uv.y, 1.2, 2, 30);
+        color = vec3(cFBM);
+    }
+    else if(mode == 5){
+        cFract = multifractal(2*uv.x, 2*uv.y, 0.4f, 1.5f, 12, 0.9f);
+        cFract = fBm(7*uv.x, 7*uv.y, 1.2, 7, 15);
+        color = vec3((cFract + cFract)/1.3);
+    }
+    else if(mode == 6){
+        cFract = multifractal(3*uv.x, 3*uv.y, 0.67f, 1.26f, 10, 1.3f);
+        color = vec3(cFract - 1.5);
+    }
+    else { //default
+        cFBM = fBm(10*uv.x, 10*uv.y, 1.2, 7, 15);
+        cFract = multifractal(10*uv.x, 10*uv.y, 1.2f, 1.5f, 4, 0.9f);
+        color = vec3((cFBM+cFract) - 0.5);
+    }
+
 }
 

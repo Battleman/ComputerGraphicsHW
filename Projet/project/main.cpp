@@ -49,9 +49,10 @@ bool cam_right = false;
 bool cam_upward = false;
 bool cam_downward = false;
 vec2 mouse_anchor(0.0f);
+int terrainMode = 1;
 
 float filter = 2.0f;
-uint8 camera_mode = 1;
+uint8 camera_mode = 0;
 float bezierT = 0.0f;
 int bezierCurve = 0;
 vec3* bezierPoints;
@@ -78,6 +79,17 @@ vec3* AframeConstruction(vec3 start, vec3 left, vec3 end) {
     res[1] = right;
     res[2] = end;
     return &res[0];
+}
+
+void draw_perlin(){
+    //Perlin Noise
+    framebuffer.Clear();
+    framebuffer.Bind();
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        screenquad.Draw(terrainMode);
+    }
+    framebuffer.Unbind();
 }
 
 void Init(GLFWwindow* window) {
@@ -144,15 +156,7 @@ void Init(GLFWwindow* window) {
     clouds.Init(framebuffer_texture_id);
     water.Init(waterbuffer_texture_id);
     skybox.Init();
-
-    //Perlin Noise
-    framebuffer.Clear();
-    framebuffer.Bind();
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        screenquad.Draw();
-    }
-    framebuffer.Unbind();
+    draw_perlin();
 }
 
 void RecomputeReflectionViewMat() {
@@ -332,7 +336,7 @@ void Display() {
     glViewport(0, 0, window_width, window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    skybox.Draw(/*IDENTITY_MATRIX * */ projection_matrix * view_matrix );
+    skybox.Draw(projection_matrix * view_matrix );
     quad.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix, 0); //I is used as the model matrix
     water.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix, 0);
     clouds.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix);
@@ -372,69 +376,131 @@ void ErrorCallback(int error, const char* description) {
 }
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
-    }
-    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-        camera_mode = 0;
-        std::cout << "Switched to free camera mode" << std::endl;
-        std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
-        bezierT = 0.0;
-        bezierCurve = 0;
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
-        camera_mode = 1;
-        std::cout << "Switched to ground camera mode" << std::endl;
-        std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
-        camera_mode = 2;
-        std::cout << "Switched to buttons-only camera mode" << std::endl;
-        std::cout << "Controls: wasd to move the camera, q to look up and e to look down" << std::endl;
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
-        camera_mode = 3;
-        std::cout << "Switched to automatic camera mode" << std::endl;
-        std::cout << "Controls: none" << std::endl;
-        cam_look = vec3(0.0,0.0,0.0);
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
-        camera_mode = 4;
-        std::cout << "Switched to trackball mode" << std::endl;
-        std::cout << "Controls: left click and drag to move the trackball" << std::endl;
-        //trackball_matrix = IDENTITY_MATRIX;
-    }
-    if (key == GLFW_KEY_W) {
+    switch(key){
+        case GLFW_KEY_ESCAPE :
+            if(action == GLFW_PRESS) {glfwSetWindowShouldClose(window, GL_TRUE);}
+
+        /*########
+         * Camera
+         * #######*/
+        case GLFW_KEY_W: //forward
+            if(action == GLFW_PRESS) {
+                cam_forward = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_forward = false;
+            }
+            break;
+        case GLFW_KEY_S : //backward
+            if(action == GLFW_PRESS) {
+                cam_backward = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_backward = false;
+            }
+            break;
+        case GLFW_KEY_A : //left
+            if(action == GLFW_PRESS) {
+                cam_left = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_left = false;
+            }
+            break;
+        case GLFW_KEY_D: //right
+            if(action == GLFW_PRESS) {
+                cam_right = true;
+            } else if(action == GLFW_RELEASE) {
+                cam_right = false;
+            }
+            break;
+
+        /*########
+         * Terrain mode
+         * #######*/
+        case GLFW_KEY_F1: //Terrain 1
+            if(action == GLFW_PRESS){
+                terrainMode = 1;
+            }
+            break;
+        case GLFW_KEY_F2: //Terrain 2
+            if(action == GLFW_PRESS){
+                terrainMode = 2;
+            }
+            break;
+        case GLFW_KEY_F3: //Terrain 3
+            if(action == GLFW_PRESS){
+                terrainMode = 3;
+            }
+            break;
+        case GLFW_KEY_F4: //Terrain 4
+            if(action == GLFW_PRESS){
+                terrainMode = 4;
+            }
+            break;
+        case GLFW_KEY_F5: //Terrain 5
+            if(action == GLFW_PRESS){
+                terrainMode = 5;
+            }
+            break;
+        case GLFW_KEY_F6: //Terrain 6
+            if(action == GLFW_PRESS){
+                terrainMode = 6;
+            }
+            break;
+
+        /*########
+         * Misc
+         * #######*/
+        case GLFW_KEY_R: //Re-randomize the noise
+            if(action == GLFW_PRESS){
+                screenquad.Cleanup();
+                screenquad.Init(window_width, window_height);
+                draw_perlin();
+            }
+            break;
+    case GLFW_KEY_1 :
         if(action == GLFW_PRESS) {
-            cam_forward = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_forward = false;
+            camera_mode = 0;
+            std::cout << "Switched to free camera mode" << std::endl;
+            std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
+            bezierT = 0.0;
+            bezierCurve = 0;
+            //trackball_matrix = IDENTITY_MATRIX;
         }
-    }
-    if (key == GLFW_KEY_S) {
+        break;
+    case GLFW_KEY_0:
         if(action == GLFW_PRESS) {
-            cam_backward = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_backward = false;
+            camera_mode = 1;
+            std::cout << "Switched to ground camera mode" << std::endl;
+            std::cout << "Controls: right-click and move mouse to look around, wasd to move the camera" << std::endl;
         }
-    }
-    if (key == GLFW_KEY_A) {
+        break;
+    case GLFW_KEY_2:
         if(action == GLFW_PRESS) {
-            cam_left = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_left = false;
+            camera_mode = 2;
+            std::cout << "Switched to buttons-only camera mode" << std::endl;
+            std::cout << "Controls: wasd to move the camera, q to look up and e to look down" << std::endl;
         }
-    }
-    if (key == GLFW_KEY_D) {
+        break;
+    case GLFW_KEY_3:
         if(action == GLFW_PRESS) {
-            cam_right = true;
-        } else if(action == GLFW_RELEASE) {
-            cam_right = false;
+            camera_mode = 3;
+            std::cout << "Switched to automatic camera mode" << std::endl;
+            std::cout << "Controls: none" << std::endl;
+            cam_look = vec3(0.0,0.0,0.0);
         }
+        break;
+    case GLFW_KEY_4:
+        if(action == GLFW_PRESS) {
+            camera_mode = 4;
+            std::cout << "Switched to trackball mode" << std::endl;
+            std::cout << "Controls: left click and drag to move the trackball" << std::endl;
+            //trackball_matrix = IDENTITY_MATRIX;
+        }
+        break;
+    }
+    if((key == GLFW_KEY_F1 || key == GLFW_KEY_F2 || key == GLFW_KEY_F3 ||
+        key == GLFW_KEY_F4 || key == GLFW_KEY_F5 || key == GLFW_KEY_F6) &&
+        action == GLFW_PRESS) {
+        draw_perlin();
     }
 }
 
