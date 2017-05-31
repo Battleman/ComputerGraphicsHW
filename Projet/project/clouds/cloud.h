@@ -12,7 +12,7 @@ class Cloud {
         GLuint vertex_buffer_object_index_;     // memory buffer for indices
         GLuint texture_id_;             // texture ID
         GLuint num_indices_;            // number of vertices to render
-        float move_factor = 0.006;
+        float move_factor = 0.05;
 
 
     public:

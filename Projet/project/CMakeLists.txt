@@ -21,9 +21,7 @@ file(GLOB TEXTURES
     quad/SandTexture.jpg
     quad/ForestTexture.jpg
     quad/normalMap.png
-    quad/waterDUDV.png
-
-    clouds/cloud.jpg)
+    quad/waterDUDV.png)
 copy_files_once(${TEXTURES})
 
 # list all the files you want to copy everytime
