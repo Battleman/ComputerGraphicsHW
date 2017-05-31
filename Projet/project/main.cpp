@@ -46,6 +46,8 @@ bool cam_forward = false;
 bool cam_backward = false;
 bool cam_left = false;
 bool cam_right = false;
+bool cam_upward = false;
+bool cam_downward = false;
 vec2 mouse_anchor(0.0f);
 
 float filter = 2.0f;
@@ -169,7 +171,7 @@ void UpdateCamera() {
     vec3 previous_pos = cam_pos;
     float* height;
     if(cam_forward || cam_backward || cam_left || cam_right){
-        speed = speed >= 0.2? 0.2: speed+0.01;
+        speed = speed >= 0.1? 0.1: speed+0.001;
     } else {
         speed = 0;
     }
@@ -260,7 +262,34 @@ void UpdateCamera() {
             free(height);
         }
         break;
-
+    case 2:
+        if(cam_forward) {
+            translate_vector = normalize(cam_look-cam_pos)*speed*2.0f;
+            cam_look = cam_look+translate_vector;
+            cam_pos = cam_pos+translate_vector;
+        }
+        if(cam_backward) {
+            translate_vector = normalize(cam_look-cam_pos)*speed*2.0f;
+            cam_look = cam_look-translate_vector;
+            cam_pos = cam_pos-translate_vector;
+        }
+        if(cam_left) {
+            translate_vector = normalize(cross(cam_look-cam_pos,cam_up))*speed*2.0f;
+            cam_look = cam_look-translate_vector;
+        }
+        if(cam_right) {
+            translate_vector = normalize(cross(cam_look-cam_pos,cam_up))*speed*2.0f;
+            cam_look = cam_look+translate_vector;
+        }
+        if(cam_upward) {
+            translate_vector = normalize(cam_up)*speed*2.0f;
+            cam_look = cam_look-translate_vector;
+        }
+        if(cam_downward) {
+            translate_vector = -normalize(cam_up)*speed*2.0f;
+            cam_look = cam_look-translate_vector;
+        }
+        break;
     case 3:
         bezierT += 0.01;
         if(bezierT >= 1.0f) {
