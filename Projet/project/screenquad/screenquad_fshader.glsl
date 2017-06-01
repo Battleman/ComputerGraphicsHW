@@ -5,8 +5,6 @@ in vec2 uv;
 
 out vec3 color;
 
-uniform float tex_width;
-uniform float tex_height;
 uniform int[512] p;
 uniform int mode;
 int repeat = 256;
@@ -19,11 +17,11 @@ int inc(int num) {
 }
 
 float mix(float x, float y , float f) {
-  return (1 - f)*x + f*y;
+    return (1 - f)*x + f*y;
 }
 
 float fade(float t) {
-  return t*t*t*(t*(t*6.0 - 15.0) + 10.0);
+    return t*t*t*(t*(t*6.0 - 15.0) + 10.0);
 }
 
 float grad(int hash, float x, float y) {

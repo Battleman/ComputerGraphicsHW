@@ -352,9 +352,6 @@ void Display() {
     clouds.Draw(IDENTITY_MATRIX, view_matrix, projection_matrix);
 }
 
-
-
-
 // gets called when the windows/framebuffer is resized.
 void ResizeCallback(GLFWwindow* window, int width, int height) {
     window_width = width;
@@ -365,7 +362,6 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
 
     glViewport(0, 0, window_width, window_height);
 
-    //TODO : check with Boris, might solve resize issue
     reflect_mat = mat4( vec4( 1.0-2*r_plane.x*r_plane.x, -2*r_plane.x*r_plane.y, -2*r_plane.x*r_plane.z, 0.0),
                         vec4( -2*r_plane.x*r_plane.y, 1.0-2*r_plane.y*r_plane.y, -2*r_plane.y*r_plane.z, 0.0),
                         vec4( -2*r_plane.x*r_plane.z, -2*r_plane.y*r_plane.z, 1.0-2*r_plane.z*r_plane.z, 0.0),
@@ -387,99 +383,99 @@ void ErrorCallback(int error, const char* description) {
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     switch(key){
-        case GLFW_KEY_ESCAPE :
-            if(action == GLFW_PRESS) {glfwSetWindowShouldClose(window, GL_TRUE);}
+    case GLFW_KEY_ESCAPE :
+        if(action == GLFW_PRESS) {glfwSetWindowShouldClose(window, GL_TRUE);}
 
         /*########
          * Camera
          * #######*/
-        case GLFW_KEY_W: //forward
-            if(action == GLFW_PRESS) {
-                cam_forward = true;
-            } else if(action == GLFW_RELEASE) {
-                cam_forward = false;
-            }
-            break;
-        case GLFW_KEY_S : //backward
-            if(action == GLFW_PRESS) {
-                cam_backward = true;
-            } else if(action == GLFW_RELEASE) {
-                cam_backward = false;
-            }
-            break;
-        case GLFW_KEY_A : //left
-            if(action == GLFW_PRESS) {
-                cam_left = true;
-            } else if(action == GLFW_RELEASE) {
-                cam_left = false;
-            }
-            break;
-        case GLFW_KEY_D: //right
-            if(action == GLFW_PRESS) {
-                cam_right = true;
-            } else if(action == GLFW_RELEASE) {
-                cam_right = false;
-            }
-            break;
-        case GLFW_KEY_Q: //up
-            if(action == GLFW_PRESS) {
-                cam_upward = true;
-            } else if(action == GLFW_RELEASE) {
+    case GLFW_KEY_W: //forward
+        if(action == GLFW_PRESS) {
+            cam_forward = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_forward = false;
+        }
+        break;
+    case GLFW_KEY_S : //backward
+        if(action == GLFW_PRESS) {
+            cam_backward = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_backward = false;
+        }
+        break;
+    case GLFW_KEY_A : //left
+        if(action == GLFW_PRESS) {
+            cam_left = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_left = false;
+        }
+        break;
+    case GLFW_KEY_D: //right
+        if(action == GLFW_PRESS) {
+            cam_right = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_right = false;
+        }
+        break;
+    case GLFW_KEY_Q: //up
+        if(action == GLFW_PRESS) {
+            cam_upward = true;
+        } else if(action == GLFW_RELEASE) {
             cam_upward = false;
-            }
-            break;
-        case GLFW_KEY_E: //down
-            if(action == GLFW_PRESS) {
-                cam_downward = true;
-            } else if(action == GLFW_RELEASE) {
-                cam_downward = false;
-            }
-            break;
+        }
+        break;
+    case GLFW_KEY_E: //down
+        if(action == GLFW_PRESS) {
+            cam_downward = true;
+        } else if(action == GLFW_RELEASE) {
+            cam_downward = false;
+        }
+        break;
 
         /*########
          * Terrain mode
          * #######*/
-        case GLFW_KEY_F1: //Terrain 1
-            if(action == GLFW_PRESS){
-                terrainMode = 1;
-            }
-            break;
-        case GLFW_KEY_F2: //Terrain 2
-            if(action == GLFW_PRESS){
-                terrainMode = 2;
-            }
-            break;
-        case GLFW_KEY_F3: //Terrain 3
-            if(action == GLFW_PRESS){
-                terrainMode = 3;
-            }
-            break;
-        case GLFW_KEY_F4: //Terrain 4
-            if(action == GLFW_PRESS){
-                terrainMode = 4;
-            }
-            break;
-        case GLFW_KEY_F5: //Terrain 5
-            if(action == GLFW_PRESS){
-                terrainMode = 5;
-            }
-            break;
-        case GLFW_KEY_F6: //Terrain 6
-            if(action == GLFW_PRESS){
-                terrainMode = 6;
-            }
-            break;
+    case GLFW_KEY_F1: //Terrain 1
+        if(action == GLFW_PRESS){
+            terrainMode = 1;
+        }
+        break;
+    case GLFW_KEY_F2: //Terrain 2
+        if(action == GLFW_PRESS){
+            terrainMode = 2;
+        }
+        break;
+    case GLFW_KEY_F3: //Terrain 3
+        if(action == GLFW_PRESS){
+            terrainMode = 3;
+        }
+        break;
+    case GLFW_KEY_F4: //Terrain 4
+        if(action == GLFW_PRESS){
+            terrainMode = 4;
+        }
+        break;
+    case GLFW_KEY_F5: //Terrain 5
+        if(action == GLFW_PRESS){
+            terrainMode = 5;
+        }
+        break;
+    case GLFW_KEY_F6: //Terrain 6
+        if(action == GLFW_PRESS){
+            terrainMode = 6;
+        }
+        break;
 
         /*########
          * Misc
          * #######*/
-        case GLFW_KEY_R: //Re-randomize the noise
-            if(action == GLFW_PRESS){
-                screenquad.Cleanup();
-                screenquad.Init(window_width, window_height);
-                draw_perlin();
-            }
-            break;
+    case GLFW_KEY_R: //Re-randomize the noise
+        if(action == GLFW_PRESS){
+            screenquad.Cleanup();
+            screenquad.Init(window_width, window_height);
+            draw_perlin();
+        }
+        break;
     case GLFW_KEY_1 :
         if(action == GLFW_PRESS) {
             camera_mode = 0;
@@ -523,7 +519,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
     if((key == GLFW_KEY_F1 || key == GLFW_KEY_F2 || key == GLFW_KEY_F3 ||
         key == GLFW_KEY_F4 || key == GLFW_KEY_F5 || key == GLFW_KEY_F6) &&
-        action == GLFW_PRESS) {
+            action == GLFW_PRESS) {
         draw_perlin();
     }
 }
@@ -553,18 +549,18 @@ void MousePos(GLFWwindow* window, double x, double y) {
 
         //std::cout << mouse_anchor.y << std::endl;
 
-            vec2 mouse_dif = mouse_anchor - TransformScreenCoords(window, x, y);
-            if(length(mouse_dif) > 0.0) {
-                mouse_anchor = TransformScreenCoords(window, x, y);
-                vec3 old_cam_look = cam_look;
-                vec3 look_direction = cam_look-cam_pos;
-                vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(look_direction,cam_up))*mouse_dif.x,look_direction);
-                mat4 rotation = rotate(mat4(1.0f),0.04f,rotation_axis);
-                vec3 new_cam_look = glm::vec3(rotation * glm::vec4(cam_look-cam_pos, 0.0));
-                vec3 new_cam_up = vec3(0.0,0.0,1.0);//glm::vec3(rotation * glm::vec4(cam_up, 0.0));
-                cam_up = normalize(new_cam_up);
-                cam_look = cam_pos+(normalize(new_cam_look)*2.0f);
-                if(abs(normalize(cam_look-cam_pos).z) > cam_up.z-0.05) cam_look = old_cam_look;
+        vec2 mouse_dif = mouse_anchor - TransformScreenCoords(window, x, y);
+        if(length(mouse_dif) > 0.0) {
+            mouse_anchor = TransformScreenCoords(window, x, y);
+            vec3 old_cam_look = cam_look;
+            vec3 look_direction = cam_look-cam_pos;
+            vec3 rotation_axis = cross(normalize(cam_up)*mouse_dif.y,look_direction) + cross(normalize(cross(look_direction,cam_up))*mouse_dif.x,look_direction);
+            mat4 rotation = rotate(mat4(1.0f),0.04f,rotation_axis);
+            vec3 new_cam_look = glm::vec3(rotation * glm::vec4(cam_look-cam_pos, 0.0));
+            vec3 new_cam_up = vec3(0.0,0.0,1.0);//glm::vec3(rotation * glm::vec4(cam_up, 0.0));
+            cam_up = normalize(new_cam_up);
+            cam_look = cam_pos+(normalize(new_cam_look)*2.0f);
+            if(abs(normalize(cam_look-cam_pos).z) > cam_up.z-0.05) cam_look = old_cam_look;
         }
     }
 }
